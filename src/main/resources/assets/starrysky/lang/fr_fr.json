@@ -1,0 +1,62 @@
+{
+  "fml.menu.mods.info.description.starrysky": "Un ciel nocturne plus beau : plus d'étoiles, de tailles et de couleurs variées, scintillement léger et étoiles filantes. Uniquement côté client.",
+
+  "starrysky.configuration.title": "Configuration de Starry Sky",
+  "starrysky.configuration.section.starrysky.client.toml": "Réglages de Starry Sky",
+  "starrysky.configuration.section.starrysky.client.toml.title": "Réglages de Starry Sky",
+
+  "starrysky.configuration.enabled": "Activer Starry Sky",
+  "starrysky.configuration.enabled.tooltip": "Active ou désactive le ciel étoilé amélioré.",
+
+  "starrysky.configuration.starCount": "Nombre d'étoiles",
+  "starrysky.configuration.starCount.tooltip": "Nombre d'étoiles sur la voûte céleste. Le jeu de base en affiche environ 800. La Voie lactée ajoute deux fois plus de minuscules étoiles en supplément. Même 10000 reste léger à afficher.",
+
+  "starrysky.configuration.starSize": "Taille des étoiles",
+  "starrysky.configuration.starSize.tooltip": "Multiplicateur de taille appliqué à toutes les étoiles.",
+
+  "starrysky.configuration.brightness": "Luminosité",
+  "starrysky.configuration.brightness.tooltip": "Luminosité globale des étoiles.",
+
+  "starrysky.configuration.coloredStars": "Étoiles colorées",
+  "starrysky.configuration.coloredStars.tooltip": "Ajoute de légères variations de couleur : étoiles blanches, bleutées et jaune pâle.",
+
+  "starrysky.configuration.twinkle": "Scintillement",
+  "starrysky.configuration.twinkle.tooltip": "Fait scintiller doucement les étoiles au fil du temps.",
+
+  "starrysky.configuration.twinkleSpeed": "Vitesse du scintillement",
+  "starrysky.configuration.twinkleSpeed.tooltip": "Vitesse de l'animation de scintillement.",
+
+  "starrysky.configuration.shootingStars": "Étoiles filantes",
+  "starrysky.configuration.shootingStars.tooltip": "Des étoiles filantes traversent parfois le ciel nocturne.",
+
+  "starrysky.configuration.shootingStarFrequency": "Fréquence des étoiles filantes",
+  "starrysky.configuration.shootingStarFrequency.tooltip": "Nombre moyen d'étoiles filantes par minute par nuit claire. 0 les désactive.",
+
+  "starrysky.configuration.milkyWay": "Voie lactée",
+  "starrysky.configuration.milkyWay.tooltip": "Une bande lumineuse de poussières d'étoiles traverse le ciel nocturne. C'est l'effet le plus gourmand du mod, même s'il reste léger : à désactiver en premier si le jeu ralentit quand on regarde le ciel la nuit.",
+
+  "starrysky.configuration.auroras": "Aurores boréales",
+  "starrysky.configuration.auroras.tooltip": "Des rideaux de lumière verte et violette dansent vers le nord la nuit, uniquement dans les biomes froids (neige, glace).",
+
+  "starrysky.configuration.telescope":"Infos des étoiles à la longue-vue",
+  "starrysky.configuration.telescope.tooltip": "Visez une étoile brillante la nuit avec une longue-vue pour afficher son nom et ses caractéristiques.",
+
+  "starrysky.telescope.class": "Classe",
+  "starrysky.telescope.magnitude": "Magnitude",
+  "starrysky.telescope.distance": "Distance",
+  "starrysky.telescope.temperature": "Température",
+  "starrysky.telescope.lightyears": "%s al",
+  "starrysky.telescope.type.b": "Géante bleue",
+  "starrysky.telescope.type.a": "Étoile blanche",
+  "starrysky.telescope.type.f": "Étoile blanc-jaune",
+  "starrysky.telescope.type.g": "Naine jaune",
+  "starrysky.telescope.type.k": "Géante orange",
+  "starrysky.telescope.hint.aim": "Visez une étoile brillante",
+  "starrysky.telescope.hint.too_bright": "Le ciel est trop clair pour voir les étoiles",
+
+  "starrysky.configuration.hideVanillaStars": "Masquer les étoiles de base",
+  "starrysky.configuration.hideVanillaStars.tooltip": "Cache les étoiles d'origine de Minecraft là où Starry Sky est actif.",
+
+  "starrysky.configuration.dimensions": "Dimensions",
+  "starrysky.configuration.dimensions.tooltip": "Identifiants des dimensions où Starry Sky est actif (ex. minecraft:overworld). Seules les dimensions avec un ciel normal sont concernées : le Nether et l'End restent inchangés."
+}

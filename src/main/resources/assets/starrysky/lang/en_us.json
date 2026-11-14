@@ -1,0 +1,62 @@
+{
+  "fml.menu.mods.info.description.starrysky": "A more beautiful night sky: more stars, varied sizes and colors, gentle twinkling and shooting stars. Client-side only.",
+
+  "starrysky.configuration.title": "Starry Sky Configuration",
+  "starrysky.configuration.section.starrysky.client.toml": "Starry Sky Settings",
+  "starrysky.configuration.section.starrysky.client.toml.title": "Starry Sky Settings",
+
+  "starrysky.configuration.enabled": "Enable Starry Sky",
+  "starrysky.configuration.enabled.tooltip": "Turns the improved night sky on or off.",
+
+  "starrysky.configuration.starCount": "Star Count",
+  "starrysky.configuration.starCount.tooltip": "Number of stars on the celestial sphere. Vanilla shows about 800. The Milky Way adds twice as many tiny stars on top. Even 10000 stays cheap to draw.",
+
+  "starrysky.configuration.starSize": "Star Size",
+  "starrysky.configuration.starSize.tooltip": "Size multiplier applied to every star.",
+
+  "starrysky.configuration.brightness": "Brightness",
+  "starrysky.configuration.brightness.tooltip": "Overall brightness of the stars.",
+
+  "starrysky.configuration.coloredStars": "Colored Stars",
+  "starrysky.configuration.coloredStars.tooltip": "Adds subtle color variations: white, bluish and pale yellow stars.",
+
+  "starrysky.configuration.twinkle": "Twinkle",
+  "starrysky.configuration.twinkle.tooltip": "Makes the stars gently twinkle over time.",
+
+  "starrysky.configuration.twinkleSpeed": "Twinkle Speed",
+  "starrysky.configuration.twinkleSpeed.tooltip": "Speed of the twinkling animation.",
+
+  "starrysky.configuration.shootingStars": "Shooting Stars",
+  "starrysky.configuration.shootingStars.tooltip": "Occasional shooting stars streak across the night sky.",
+
+  "starrysky.configuration.shootingStarFrequency": "Shooting Star Frequency",
+  "starrysky.configuration.shootingStarFrequency.tooltip": "Average number of shooting stars per minute on a clear night. 0 disables them.",
+
+  "starrysky.configuration.milkyWay": "Milky Way",
+  "starrysky.configuration.milkyWay.tooltip": "A glowing band of star dust crosses the night sky. This is the most demanding effect of the mod, although still light: turn it off first if the game slows down when you look at the night sky.",
+
+  "starrysky.configuration.auroras": "Northern Lights",
+  "starrysky.configuration.auroras.tooltip": "Curtains of green and violet light dance in the northern sky at night, only in cold biomes (snow, ice).",
+
+  "starrysky.configuration.telescope":"Spyglass Star Info",
+  "starrysky.configuration.telescope.tooltip": "Aim a spyglass at a bright star at night to see its name and characteristics.",
+
+  "starrysky.telescope.class": "Class",
+  "starrysky.telescope.magnitude": "Magnitude",
+  "starrysky.telescope.distance": "Distance",
+  "starrysky.telescope.temperature": "Temperature",
+  "starrysky.telescope.lightyears": "%s ly",
+  "starrysky.telescope.type.b": "Blue giant",
+  "starrysky.telescope.type.a": "White star",
+  "starrysky.telescope.type.f": "Yellow-white star",
+  "starrysky.telescope.type.g": "Yellow dwarf",
+  "starrysky.telescope.type.k": "Orange giant",
+  "starrysky.telescope.hint.aim": "Aim at a bright star",
+  "starrysky.telescope.hint.too_bright": "The sky is too bright to see the stars",
+
+  "starrysky.configuration.hideVanillaStars": "Hide Vanilla Stars",
+  "starrysky.configuration.hideVanillaStars.tooltip": "Hides Minecraft's original stars wherever Starry Sky is active.",
+
+  "starrysky.configuration.dimensions": "Dimensions",
+  "starrysky.configuration.dimensions.tooltip": "Dimension IDs where Starry Sky is active (e.g. minecraft:overworld). Only dimensions with a normal sky are affected: the Nether and the End stay unchanged."
+}
