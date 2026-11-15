@@ -86,7 +86,7 @@ public final class StarField {
     private void rebuild(int count, boolean colored, boolean milkyWay) {
         int dustTarget = milkyWay ? Math.min(Math.round(count * DUST_PER_STAR), MAX_DUST) : 0;
         VertexFormat format = DefaultVertexFormat.POSITION_TEX_COLOR;
-        try (ByteBufferBuilder bytes = new ByteBufferBuilder((count + dustTarget) * 4 * format.getVertexSize())) {
+        try (ByteBufferBuilder bytes = new ByteBufferBuilder((count + dustTarget + 64) * 4 * format.getVertexSize())) {
             BufferBuilder builder = new BufferBuilder(bytes, VertexFormat.Mode.QUADS, format);
 
             RandomSource random = RandomSource.create(STAR_SEED);
@@ -94,6 +94,8 @@ public final class StarField {
             for (int i = 0; i < count; i++) {
                 addStar(builder, random, colored, catalog);
             }
+            // Les vraies constellations (Orion, Grande Ourse…) s'ajoutent toujours, quel que soit le nombre d'étoiles.
+            Constellations.addTo(builder, catalog, colored);
             catalog.publish();
             if (dustTarget > 0) {
                 addMilkyWayDust(builder, dustTarget, colored);
@@ -204,7 +206,7 @@ public final class StarField {
     }
 
     /** Écrit les 4 sommets d'une étoile. (x, y, z) est une direction de longueur 1. */
-    private static void sprite(BufferBuilder builder, float x, float y, float z, float size, float glint,
+    static void sprite(BufferBuilder builder, float x, float y, float z, float size, float glint,
                                float r, float g, float b, float seed) {
         for (float[] corner : CORNERS) {
             builder.addVertex(x * RADIUS, y * RADIUS, z * RADIUS)

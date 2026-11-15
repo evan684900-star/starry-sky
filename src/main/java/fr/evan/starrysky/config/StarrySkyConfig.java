@@ -30,6 +30,10 @@ public final class StarrySkyConfig {
     public static final ModConfigSpec.BooleanValue MILKY_WAY;
     public static final ModConfigSpec.BooleanValue TELESCOPE;
     public static final ModConfigSpec.BooleanValue AURORAS;
+    public static final ModConfigSpec.BooleanValue PLANETS;
+    public static final ModConfigSpec.BooleanValue METEOR_SHOWERS;
+    public static final ModConfigSpec.BooleanValue MOON_HALO;
+    public static final ModConfigSpec.BooleanValue HIDE_CLOUDS_AT_NIGHT;
     public static final ModConfigSpec.BooleanValue HIDE_VANILLA_STARS;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> DIMENSIONS;
 
@@ -92,6 +96,27 @@ public final class StarrySkyConfig {
                 .comment("Aurores boréales vers le nord, la nuit, uniquement dans les biomes froids (neige, glace).")
                 .translation(PREFIX + "auroras")
                 .define("auroras", true);
+
+        PLANETS = builder
+                .comment("Planètes (Vénus, Mars, Jupiter, Saturne) : brillantes, sans scintillement, elles bougent d'une nuit à l'autre.")
+                .translation(PREFIX + "planets")
+                .define("planets", true);
+
+        METEOR_SHOWERS = builder
+                .comment("Environ une nuit sur dix : pluie d'étoiles filantes, annoncée au crépuscule.")
+                .translation(PREFIX + "meteorShowers")
+                .define("meteorShowers", true);
+
+        MOON_HALO = builder
+                .comment("Halo lumineux autour de la lune, plus fort à la pleine lune.")
+                .translation(PREFIX + "moonHalo")
+                .define("moonHalo", true);
+
+        HIDE_CLOUDS_AT_NIGHT = builder
+                .comment("Les nuages s'effacent progressivement à la tombée de la nuit et reviennent à l'aube",
+                        "(ils restent visibles quand il pleut ou qu'il neige).")
+                .translation(PREFIX + "hideCloudsAtNight")
+                .define("hideCloudsAtNight", true);
 
         TELESCOPE = builder
                 .comment("Longue-vue : en visant une étoile brillante la nuit, affiche son nom et ses caractéristiques.")

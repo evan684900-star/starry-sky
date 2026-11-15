@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "OptionsMixin",
+    "SodiumCloudRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

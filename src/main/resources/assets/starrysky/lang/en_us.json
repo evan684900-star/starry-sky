@@ -41,6 +41,36 @@
   "starrysky.configuration.telescope":"Spyglass Star Info",
   "starrysky.configuration.telescope.tooltip": "Aim a spyglass at a bright star at night to see its name and characteristics.",
 
+  "starrysky.configuration.planets": "Planets",
+  "starrysky.configuration.planets.tooltip": "Venus, Mars, Jupiter and Saturn: bright, steady points that move from one night to the next. Venus shows up near the horizon at dusk or dawn.",
+  "starrysky.configuration.meteorShowers": "Meteor Showers",
+  "starrysky.configuration.meteorShowers.tooltip": "About one night in ten, many more shooting stars. Announced at dusk.",
+  "starrysky.configuration.moonHalo": "Moon Halo",
+  "starrysky.configuration.moonHalo.tooltip": "A soft glow around the moon, stronger at full moon. A full moon also makes the stars and the Milky Way a little paler.",
+
+  "starrysky.configuration.hideCloudsAtNight": "Fade Clouds at Night",
+  "starrysky.configuration.hideCloudsAtNight.tooltip": "Clouds gradually fade away as night falls and come back at dawn, so nothing hides the stars. They stay when it rains or snows.",
+
+  "key.categories.starrysky": "Starry Sky",
+  "key.starrysky.journal": "Observation Journal",
+
+  "starrysky.journal.title": "Observation Journal",
+  "starrysky.journal.counter": "%s / %s observed",
+  "starrysky.journal.empty": "Nothing observed yet. At night, hold a spyglass on a bright star or a planet for a moment to add it here.",
+  "starrysky.journal.new_discovery": "New discovery",
+
+  "starrysky.shower.announce": "A meteor shower lights up the sky tonight",
+
+  "starrysky.planet.venus": "Venus",
+  "starrysky.planet.mars": "Mars",
+  "starrysky.planet.jupiter": "Jupiter",
+  "starrysky.planet.saturn": "Saturn",
+  "starrysky.planet_type.terrestrial": "Rocky planet",
+  "starrysky.planet_type.gas_giant": "Gas giant",
+  "starrysky.telescope.type_label": "Type",
+  "starrysky.telescope.au": "%s AU",
+  "starrysky.telescope.type.m": "Red supergiant",
+
   "starrysky.telescope.class": "Class",
   "starrysky.telescope.magnitude": "Magnitude",
   "starrysky.telescope.distance": "Distance",

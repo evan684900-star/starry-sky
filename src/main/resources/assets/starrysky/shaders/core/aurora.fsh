@@ -7,6 +7,7 @@
 
 uniform vec4 ColorModulator; // overall strength (cold biome fade * night visibility)
 uniform float AuroraTime;
+uniform float AuroraStorm;   // 0 = normal night, 1 = geomagnetic storm (red and pink upper curtains)
 
 in vec2 curtain;
 in float seed;
@@ -40,6 +41,9 @@ void main() {
     color = mix(color, violet, smoothstep(0.45, 0.85, v));
     // Faint pink fringe along the very bottom edge.
     color = mix(color, vec3(1.0, 0.35, 0.6), (1.0 - smoothstep(0.0, 0.10, v)) * 0.45);
+    // Storm nights: the upper part turns crimson and pink, like rare strong auroras.
+    vec3 stormTop = mix(vec3(1.0, 0.30, 0.45), vec3(0.95, 0.15, 0.25), smoothstep(0.6, 1.0, v));
+    color = mix(color, stormTop, AuroraStorm * smoothstep(0.35, 0.75, v));
     // The violet top is dimmer in absolute terms: lift it a little so it stays visible.
     light *= 1.0 + 0.8 * smoothstep(0.45, 0.85, v);
 

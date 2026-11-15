@@ -26,15 +26,33 @@ génération d'étoiles, hors du jeu) : ce n'est pas une capture d'écran prise 
 - **Atténuation près de l'horizon** (extinction atmosphérique).
 - **Scintillement léger** (optionnel), avec un très léger chatoiement de couleur, calculé sur la carte graphique.
 - **Étoiles filantes occasionnelles** (optionnelles), avec une traînée douce et une tête brillante.
+- **Vraies constellations** : Orion, la Grande Ourse, Cassiopée, le Cygne et la Lyre, avec leurs vraies étoiles
+  (Bételgeuse, Rigel, Véga, Deneb…). À la longue-vue, des pointillés relient les étoiles de la constellation visée.
+- **Planètes** (optionnelles) : Vénus (près de l'horizon au crépuscule ou à l'aube), Mars, Jupiter et Saturne.
+  Brillantes, sans scintillement, elles se déplacent d'une nuit à l'autre.
+- **Pluies d'étoiles filantes** (optionnelles) : environ une nuit sur dix, annoncées au crépuscule.
+- **Lune ronde** : la lune carrée de Minecraft est remplacée par une lune ronde et lisse, avec ses mers, un léger halo
+  et ses 8 phases. C'est une texture : elle s'applique même si le mod est désactivé dans la config, et un pack de
+  ressources qui modifie la lune passe devant.
+- **Halo de lune** (optionnel) : une lueur bleutée autour de la lune, plus forte à la pleine lune. La pleine lune
+  pâlit aussi un peu les étoiles et la Voie lactée.
+- **Nuages effacés la nuit** (optionnel) : ils s'estompent progressivement au crépuscule et reviennent à l'aube,
+  mais restent quand il pleut ou neige. Avec Sodium, le masquage en pleine nuit marche toujours ; le fondu dépend
+  de la version de Sodium.
 - **Aurores boréales** (optionnelles) : la nuit, dans les biomes froids (plaines enneigées, taïga enneigée, pics de
   glace, océans gelés…), des rideaux de lumière verte, turquoise et violette ondulent vers le nord. Elles apparaissent
   et disparaissent en fondu (4 secondes) quand on entre dans un biome froid ou qu'on en sort, et sont cachées par
-  les chutes de neige. Le climat est évalué au niveau de la mer : un simple sommet enneigé ne suffit pas.
+  les chutes de neige. Chaque nuit est différente : faible, normale ou intense, et parfois un orage magnétique
+  aux rideaux rouges et roses. Le climat est évalué au niveau de la mer : un simple sommet enneigé ne suffit pas.
 - **Observation à la longue-vue** (optionnelle) : la nuit, viser une étoile brillante avec la longue-vue de
   Minecraft affiche un viseur qui se resserre sur l'étoile et un panneau avec son nom, sa constellation, sa classe
   spectrale, sa magnitude, sa distance et sa température. Environ 330 étoiles sont identifiables, dont les ~60 plus
   brillantes portent le nom d'une vraie étoile (Sirius, Véga, Rigel…). Le ciel du mod est imaginaire : ces noms ne
   correspondent pas aux vraies positions. Dans la longue-vue, les étoiles grossissent un peu et gagnent en éclat.
+- **Carnet d'observation** (touche **J**, modifiable dans Options → Commandes) : chaque étoile ou planète gardée un
+  court instant au centre de la longue-vue y est enregistrée, avec un carillon et un badge « Nouvelle découverte ».
+  Un compteur indique la progression (par exemple 23 / 342). Le carnet est sauvegardé sur ton ordinateur, un par
+  monde solo ou par serveur, dans `.minecraft/starrysky/journal/`.
 - Les étoiles de base de Minecraft sont masquées là où le mod est actif (optionnel).
 - Actif uniquement dans l'**Overworld** par défaut : le Nether et l'End restent inchangés.
 
@@ -68,6 +86,10 @@ Ils sont aussi enregistrés dans `config/starrysky-client.toml`.
 | `shootingStarFrequency` | entier | `5` | 0 – 20 | Nombre moyen d'étoiles filantes par minute par nuit claire (0 = aucune). |
 | `milkyWay` | booléen | `true` | — | Voie lactée (lueur diffuse + poussières d'étoiles). |
 | `auroras` | booléen | `true` | — | Aurores boréales dans les biomes froids. |
+| `planets` | booléen | `true` | — | Vénus, Mars, Jupiter et Saturne. |
+| `meteorShowers` | booléen | `true` | — | Pluie d'étoiles filantes environ une nuit sur dix. |
+| `moonHalo` | booléen | `true` | — | Halo autour de la lune. |
+| `hideCloudsAtNight` | booléen | `true` | — | Nuages effacés progressivement la nuit (sauf pluie). |
 | `telescope` | booléen | `true` | — | Infos des étoiles en visant avec la longue-vue. |
 | `hideVanillaStars` | booléen | `true` | — | Cache les étoiles de base de Minecraft. |
 | `dimensions` | liste | `["minecraft:overworld"]` | — | Dimensions où le mod est actif. Seules les dimensions avec un ciel « normal » sont concernées. |
@@ -140,6 +162,13 @@ src/main/java/fr/evan/starrysky/
 ├── render/MilkyWay.java           Modèle de la Voie lactée et maillage statique de sa lueur
 ├── render/ShootingStars.java      Étoiles filantes
 ├── render/AuroraBorealis.java     Maillage statique des aurores boréales
+├── render/Constellations.java     Vraies constellations (étoiles et traits)
+├── render/Planets.java            Planètes
+├── render/MoonHalo.java           Halo de lune
+├── telescope/ObservationJournal.java  Carnet d'observation (sauvegarde locale)
+├── telescope/JournalScreen.java   Écran du carnet
+├── mixin/OptionsMixin.java        Nuages masqués en pleine nuit
+├── mixin/SodiumCloudRendererMixin.java  Fondu des nuages avec Sodium (ignoré sans Sodium)
 ├── render/StarShaders.java        Chargement des shaders
 ├── telescope/StarCatalog.java     Catalogue des étoiles brillantes (noms, classes, distances…)
 ├── telescope/TelescopeTargeting.java  Étoile visée à la longue-vue
@@ -160,9 +189,12 @@ Les traductions de l'écran de configuration suivent les clés de NeoForge :
 (la plage autorisée est ajoutée automatiquement par NeoForge). La description du mod dans la liste des mods est
 traduite via `fml.menu.mods.info.description.starrysky`.
 
-## Note technique : le mixin
+## Note technique : les mixins
 
-Le seul mixin du mod (`LevelRendererMixin`) sert à **masquer les étoiles de base**. Elles sont dessinées au milieu de
+`OptionsMixin` masque les nuages en pleine nuit, `LevelRendererMixin` (et `SodiumCloudRendererMixin` avec Sodium)
+gère leur fondu. Tous sont facultatifs : s'ils ne peuvent pas s'appliquer, le jeu ne plante pas.
+
+`LevelRendererMixin` sert aussi à **masquer les étoiles de base**. Elles sont dessinées au milieu de
 `LevelRenderer#renderSky` depuis un tampon privé, et NeoForge n'a pas d'événement pour les désactiver.
 
 Le mixin remplace par `0` la valeur de `getStarBrightness()` **uniquement à l'endroit où `renderSky` décide de dessiner

@@ -49,7 +49,12 @@ public final class ShootingStars {
      * @param visibility   visibilité des étoiles, de 0 (jour/pluie) à 1 (pleine nuit claire)
      * @param perMinute    fréquence moyenne d'apparition, par minute
      */
-    public void update(float deltaSeconds, float visibility, boolean enabled, int perMinute) {
+    public void update(float deltaSeconds, float visibility, boolean enabled, float perMinute) {
+        update(deltaSeconds, visibility, enabled, perMinute, MAX_ACTIVE);
+    }
+
+    /** Variante avec un nombre maximal d'étoiles filantes simultanées (plus élevé les nuits de pluie de météores). */
+    public void update(float deltaSeconds, float visibility, boolean enabled, float perMinute, int maxActive) {
         if (!enabled) {
             meteors.clear();
             return;
@@ -66,7 +71,7 @@ public final class ShootingStars {
             }
         }
 
-        if (perMinute > 0 && visibility >= MIN_VISIBILITY && meteors.size() < MAX_ACTIVE) {
+        if (perMinute > 0 && visibility >= MIN_VISIBILITY && meteors.size() < maxActive) {
             // Processus de Poisson : probabilité d'au moins une apparition pendant deltaSeconds.
             double chance = 1.0 - Math.exp(-perMinute / 60.0 * deltaSeconds);
             if (random.nextDouble() < chance) {

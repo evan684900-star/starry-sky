@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fr.evan.starrysky.config.StarrySkyConfig;
+import fr.evan.starrysky.telescope.StarCatalog;
 import fr.evan.starrysky.telescope.TelescopeTargeting;
+import net.minecraft.network.chat.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +46,23 @@ public final class SkyRenderHandler {
     private static final MilkyWay MILKY_WAY = new MilkyWay();
     private static final ShootingStars SHOOTING_STARS = new ShootingStars();
     private static final AuroraBorealis AURORA = new AuroraBorealis();
+    private static final Planets PLANETS = new Planets();
+    private static final MoonHalo MOON_HALO = new MoonHalo();
+
+    /** Intensité maximale du halo de lune (à la pleine lune). */
+    private static final float MOON_HALO_PEAK = 0.22F;
+    /** Une nuit sur SHOWER_ONE_IN connaît une pluie d'étoiles filantes. */
+    private static final int SHOWER_ONE_IN = 10;
+    /** Opacité des nuages (1 = normale, 0 = masqués), lue par les mixins de nuages. */
+    private static volatile float cloudFactor = 1.0F;
+
+    /** Opacité à appliquer aux nuages : 1 le jour ou sous la pluie, 0 en pleine nuit claire. */
+    public static float cloudFactor() {
+        return cloudFactor;
+    }
+
+    /** Dernière nuit pour laquelle la pluie d'étoiles filantes a été annoncée. */
+    private static long announcedShowerNight = Long.MIN_VALUE;
 
     /** Intensité maximale des aurores. */
     private static final float AURORA_PEAK = 0.85F;
@@ -96,6 +115,7 @@ public final class SkyRenderHandler {
         ShaderInstance shootingStarShader = StarShaders.shootingStar();
         if (level == null || starShader == null || milkyWayShader == null || shootingStarShader == null || !isActiveIn(level)) {
             SHOOTING_STARS.clear();
+            cloudFactor = 1.0F;
             return;
         }
 
@@ -106,9 +126,22 @@ public final class SkyRenderHandler {
         if (milkyWay) {
             MILKY_WAY.buildIfNeeded();
         }
+        boolean planets = StarrySkyConfig.PLANETS.get();
+        if (planets) {
+            PLANETS.update(level.getDayTime(), StarrySkyConfig.COLORED_STARS.get());
+        }
+        boolean moonHalo = StarrySkyConfig.MOON_HALO.get();
+        if (moonHalo) {
+            MOON_HALO.buildIfNeeded();
+        }
 
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         float visibility = starVisibility(level, partialTick);
+        // Nuages : ils s'effacent à mesure que la nuit tombe (et reviennent à l'aube), mais restent quand il pleut.
+        cloudFactor = StarrySkyConfig.HIDE_CLOUDS_AT_NIGHT.get() ? 1.0F - visibility : 1.0F;
+        // Une nuit va du coucher du soleil (12000) au lever (24000) : même numéro pendant toute la nuit.
+        long night = Math.floorDiv(level.getDayTime(), 24000L);
+        int nightHash = StarCatalog.mix((int) night * 0x2C1B3C6D + 0x297A2D39);
 
         // Horloges : le scintillement tourne en temps réel ; les étoiles filantes s'arrêtent quand le jeu est en pause.
         boolean twinkle = StarrySkyConfig.TWINKLE.get();
@@ -116,8 +149,21 @@ public final class SkyRenderHandler {
             float speed = StarrySkyConfig.TWINKLE_SPEED.get().floatValue();
             twinkleClock = (twinkleClock + deltaSeconds * speed) % StarField.TWINKLE_PERIOD;
         }
-        SHOOTING_STARS.update(minecraft.isPaused() ? 0.0F : deltaSeconds, visibility,
-                StarrySkyConfig.SHOOTING_STARS.get(), StarrySkyConfig.SHOOTING_STAR_FREQUENCY.get());
+        // Pluie d'étoiles filantes : environ une nuit sur dix, six fois plus d'étoiles filantes (au moins 15 par minute).
+        boolean shootingStars = StarrySkyConfig.SHOOTING_STARS.get();
+        int frequency = StarrySkyConfig.SHOOTING_STAR_FREQUENCY.get();
+        boolean shower = shootingStars && frequency > 0 && StarrySkyConfig.METEOR_SHOWERS.get()
+                && Integer.remainderUnsigned(nightHash, SHOWER_ONE_IN) == 0;
+        if (shower) {
+            SHOOTING_STARS.update(minecraft.isPaused() ? 0.0F : deltaSeconds, visibility, true,
+                    Math.max(15.0F, frequency * 6.0F), 6);
+            if (visibility > 0.3F && announcedShowerNight != night) {
+                announcedShowerNight = night;
+                minecraft.gui.setOverlayMessage(Component.translatable("starrysky.shower.announce"), false);
+            }
+        } else {
+            SHOOTING_STARS.update(minecraft.isPaused() ? 0.0F : deltaSeconds, visibility, shootingStars, frequency);
+        }
 
         // Aurores : uniquement dans les biomes froids, avec un fondu quand on entre dans le biome ou qu'on en sort.
         boolean auroras = StarrySkyConfig.AURORAS.get() && StarShaders.aurora() != null;
@@ -142,6 +188,9 @@ public final class SkyRenderHandler {
 
         float brightness = StarrySkyConfig.BRIGHTNESS.get().floatValue();
         float intensity = visibility * brightness;
+        // La lune éclaire le ciel : à la pleine lune, les étoiles pâlissent un peu et la Voie lactée davantage.
+        float moonBrightness = level.getMoonBrightness();
+        float starIntensity = intensity * (1.0F - 0.25F * moonBrightness);
 
         // Même rotation que le soleil, la lune et les étoiles de base (voir LevelRenderer#renderSky) :
         // -90° autour de Y, puis l'heure du jour autour de X.
@@ -152,7 +201,7 @@ public final class SkyRenderHandler {
         Matrix4f projection = event.getProjectionMatrix();
 
         if (telescope) {
-            TelescopeTargeting.update(SKY_ROTATION, STAR_VIEW, projection, event.getCamera().getLookVector());
+            TelescopeTargeting.update(SKY_ROTATION, STAR_VIEW, projection, event.getCamera().getLookVector(), planets);
         }
 
         // État de rendu : la lumière s'ajoute au ciel (les shaders produisent une couleur déjà multipliée par leur
@@ -167,7 +216,7 @@ public final class SkyRenderHandler {
 
         // 1) Lueur de la Voie lactée. Très pâle, elle n'apparaît qu'en pleine nuit (visibilité au carré).
         if (milkyWay) {
-            float glow = intensity * visibility * MilkyWay.GLOW_PEAK;
+            float glow = intensity * visibility * MilkyWay.GLOW_PEAK * (1.0F - 0.5F * moonBrightness);
             if (glow >= MIN_GLOW) {
                 RenderSystem.setShaderColor(glow, glow, glow, 1.0F);
                 milkyWayShader.safeGetUniform("SkyMat").set(SKY_ROTATION);
@@ -175,27 +224,49 @@ public final class SkyRenderHandler {
             }
         }
 
+        // 1 bis) Halo de lune (même shader que la Voie lactée), plus fort quand la lune est pleine.
+        if (moonHalo) {
+            float halo = MOON_HALO_PEAK * moonBrightness * visibility * brightness;
+            if (halo >= MIN_GLOW) {
+                RenderSystem.setShaderColor(halo, halo, halo, 1.0F);
+                milkyWayShader.safeGetUniform("SkyMat").set(SKY_ROTATION);
+                MOON_HALO.draw(STAR_VIEW, projection, milkyWayShader);
+            }
+        }
+
         // 1 bis) Aurores boréales : dans le repère du monde (vers le nord), sans la rotation du ciel.
         ShaderInstance auroraShader = StarShaders.aurora();
         if (auroras && auroraShader != null && auroraFactor > 0.0F) {
             // Elles demandent un ciel bien noir : visibilité au carré, comme la Voie lactée.
-            float strength = AURORA_PEAK * auroraFactor * visibility * visibility;
+            // Chaque nuit est différente : faible, normale ou intense, et parfois un orage (rouge et rose).
+            int roll = Integer.remainderUnsigned(nightHash >>> 8, 100);
+            float nightStrength = roll < 20 ? 0.35F : roll < 70 ? 0.8F : roll < 92 ? 1.0F : 1.25F;
+            float storm = roll >= 92 ? 1.0F : 0.0F;
+            float strength = AURORA_PEAK * nightStrength * auroraFactor * visibility * visibility;
             if (strength >= MIN_GLOW) {
                 RenderSystem.setShaderColor(strength, strength, strength, 1.0F);
                 auroraShader.safeGetUniform("AuroraTime").set(auroraClock);
+                auroraShader.safeGetUniform("AuroraStorm").set(storm);
                 AURORA.draw(cameraView, projection, auroraShader);
             }
         }
 
         // 2) Étoiles.
         Window window = minecraft.getWindow();
-        RenderSystem.setShaderColor(intensity, intensity, intensity, 1.0F);
+        RenderSystem.setShaderColor(starIntensity, starIntensity, starIntensity, 1.0F);
         starShader.safeGetUniform("SkyMat").set(SKY_ROTATION);
         starShader.safeGetUniform("ScreenSize").set((float) window.getWidth(), (float) window.getHeight());
         starShader.safeGetUniform("StarSize").set(StarrySkyConfig.STAR_SIZE.get().floatValue());
         starShader.safeGetUniform("StarTime").set(twinkleClock);
         starShader.safeGetUniform("TwinkleAmount").set(twinkle ? TWINKLE_STRENGTH : 0.0F);
         STAR_FIELD.draw(STAR_VIEW, projection, starShader);
+
+        // 2 bis) Planètes : même shader, mais elles ne scintillent pas (et la lune ne les fait pas pâlir).
+        if (planets) {
+            RenderSystem.setShaderColor(intensity, intensity, intensity, 1.0F);
+            starShader.safeGetUniform("TwinkleAmount").set(0.0F);
+            PLANETS.draw(STAR_VIEW, projection, starShader);
+        }
 
         // 3) Étoiles filantes : dans le repère du monde (sans la rotation du ciel).
         SHOOTING_STARS.render(cameraView, projection, shootingStarShader, intensity);

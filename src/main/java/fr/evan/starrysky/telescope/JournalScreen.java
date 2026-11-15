@@ -1,0 +1,185 @@
+package fr.evan.starrysky.telescope;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import fr.evan.starrysky.StarrySky;
+import fr.evan.starrysky.render.Planets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+/**
+ * Carnet d'observation : la liste des astres découverts à la longue-vue dans ce monde, avec un compteur.
+ * S'ouvre avec la touche du carnet (J par défaut) et se ferme avec la même touche ou Échap.
+ */
+public final class JournalScreen extends Screen {
+    private static final ResourceLocation ICON_STAR = ResourceLocation.fromNamespaceAndPath(StarrySky.MODID, "telescope/star");
+    private static final ResourceLocation ICON_SMALL_STAR = ResourceLocation.fromNamespaceAndPath(StarrySky.MODID, "telescope/magnitude");
+    private static final ResourceLocation ICON_CONSTELLATION = ResourceLocation.fromNamespaceAndPath(StarrySky.MODID, "telescope/constellation");
+
+    private static final int PANEL_BG = 0xE00B0F1A;
+    private static final int BORDER = 0x30FFFFFF;
+    private static final int TITLE = 0xFFF2F4FA;
+    private static final int MUTED = 0xFF8E9AB0;
+    private static final int ACCENT = 0xFF7FA8FF;
+    private static final int GOLD = 0xFFE8C77A;
+    private static final int ROW_HEIGHT = 24;
+
+    private final KeyMapping toggleKey;
+    private final List<CatalogStar> entries = new ArrayList<>();
+    private int total;
+    private double scroll;
+
+    public JournalScreen(KeyMapping toggleKey) {
+        super(Component.translatable("starrysky.journal.title"));
+        this.toggleKey = toggleKey;
+    }
+
+    @Override
+    protected void init() {
+        // Tous les astres identifiables : planètes, constellations, étoiles nommées, puis étoiles de catalogue.
+        List<CatalogStar> all = new ArrayList<>(Planets.catalog());
+        all.addAll(StarCatalog.stars());
+        total = all.size();
+        entries.clear();
+        for (CatalogStar star : all) {
+            if (ObservationJournal.isDiscovered(star.name())) {
+                entries.add(star);
+            }
+        }
+        entries.sort(Comparator.comparingInt(JournalScreen::rank).thenComparing(CatalogStar::magnitude));
+    }
+
+    /** Ordre d'affichage : planètes, étoiles des constellations, étoiles nommées, catalogue. */
+    private static int rank(CatalogStar star) {
+        if (star.isPlanet()) {
+            return 0;
+        }
+        if (star.figure() != null) {
+            return 1;
+        }
+        return star.named() ? 2 : 3;
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+
+        int panelWidth = Math.min(340, width - 20);
+        int x0 = (width - panelWidth) / 2;
+        int x1 = x0 + panelWidth;
+        int y0 = 16;
+        int y1 = height - 16;
+
+        // Panneau.
+        graphics.fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, PANEL_BG);
+        graphics.fill(x0 + 1, y0, x1 - 1, y0 + 1, BORDER);
+        graphics.fill(x0 + 1, y1 - 1, x1 - 1, y1, BORDER);
+        graphics.fill(x0, y0 + 1, x0 + 1, y1 - 1, BORDER);
+        graphics.fill(x1 - 1, y0 + 1, x1, y1 - 1, BORDER);
+
+        // En-tête : icône, titre, compteur, barre de progression.
+        icon(graphics, ICON_STAR, x0 + 10, y0 + 10, 16, GOLD);
+        graphics.drawString(font, title.copy().withStyle(ChatFormatting.BOLD), x0 + 32, y0 + 11, TITLE, false);
+        Component counter = Component.translatable("starrysky.journal.counter",
+                StarText.formatInt(entries.size()), StarText.formatInt(total));
+        graphics.drawString(font, counter, x0 + 32, y0 + 22, MUTED, false);
+
+        int barX0 = x0 + 10;
+        int barX1 = x1 - 10;
+        int barY = y0 + 36;
+        graphics.fill(barX0, barY, barX1, barY + 3, 0x30FFFFFF);
+        if (total > 0) {
+            int filled = barX0 + Math.round((barX1 - barX0) * entries.size() / (float) total);
+            graphics.fill(barX0, barY, filled, barY + 3, ACCENT);
+        }
+
+        // Liste (avec découpe et défilement).
+        int listTop = barY + 10;
+        int listBottom = y1 - 8;
+        if (entries.isEmpty()) {
+            Component empty = Component.translatable("starrysky.journal.empty");
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(empty, panelWidth - 40);
+            int y = (listTop + listBottom) / 2 - lines.size() * 5;
+            for (net.minecraft.util.FormattedCharSequence line : lines) {
+                graphics.drawString(font, line, (width - font.width(line)) / 2, y, MUTED, false);
+                y += 10;
+            }
+            return;
+        }
+
+        int contentHeight = entries.size() * ROW_HEIGHT;
+        int viewHeight = listBottom - listTop;
+        double maxScroll = Math.max(0, contentHeight - viewHeight);
+        scroll = Math.max(0, Math.min(maxScroll, scroll));
+
+        graphics.enableScissor(x0 + 1, listTop, x1 - 1, listBottom);
+        int first = (int) (scroll / ROW_HEIGHT);
+        for (int i = first; i < entries.size(); i++) {
+            int y = listTop + i * ROW_HEIGHT - (int) scroll;
+            if (y > listBottom) {
+                break;
+            }
+            drawRow(graphics, entries.get(i), x0 + 10, x1 - 14, y, i % 2 == 0);
+        }
+        graphics.disableScissor();
+
+        // Barre de défilement fine.
+        if (maxScroll > 0) {
+            int trackX = x1 - 6;
+            int thumbHeight = Math.max(16, viewHeight * viewHeight / contentHeight);
+            int thumbY = listTop + (int) ((viewHeight - thumbHeight) * (scroll / maxScroll));
+            graphics.fill(trackX, listTop, trackX + 2, listBottom, 0x18FFFFFF);
+            graphics.fill(trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0x80FFFFFF);
+        }
+    }
+
+    private void drawRow(GuiGraphics graphics, CatalogStar star, int x0, int x1, int y, boolean even) {
+        if (even) {
+            graphics.fill(x0 - 4, y, x1 + 4, y + ROW_HEIGHT - 2, 0x0CFFFFFF);
+        }
+        int color = 0xFF000000 | star.color();
+        icon(graphics, star.figure() != null ? ICON_CONSTELLATION : ICON_SMALL_STAR, x0, y + 4, 9, star.color());
+
+        graphics.drawString(font, StarText.name(star), x0 + 14, y + 3, TITLE, false);
+        Component detail = star.isPlanet()
+                ? StarText.type(star).append(" · ").append(StarText.distance(star))
+                : Component.literal(star.constellation() + " · ").append(StarText.type(star));
+        graphics.drawString(font, detail, x0 + 14, y + 13, MUTED, false);
+
+        Component magnitude = Component.literal("mag ").append(StarText.magnitude(star));
+        graphics.drawString(font, magnitude, x1 - font.width(magnitude), y + 3, color, false);
+    }
+
+    private static void icon(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int size, int color) {
+        RenderSystem.enableBlend();
+        graphics.setColor(((color >> 16) & 0xFF) / 255.0F, ((color >> 8) & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, 1.0F);
+        graphics.blitSprite(sprite, x, y, size, size);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        scroll -= scrollY * ROW_HEIGHT * 2;
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (toggleKey.matches(keyCode, scanCode)) {
+            onClose();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+}

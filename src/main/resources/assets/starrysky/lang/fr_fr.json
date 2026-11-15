@@ -41,6 +41,36 @@
   "starrysky.configuration.telescope":"Infos des étoiles à la longue-vue",
   "starrysky.configuration.telescope.tooltip": "Visez une étoile brillante la nuit avec une longue-vue pour afficher son nom et ses caractéristiques.",
 
+  "starrysky.configuration.planets": "Planètes",
+  "starrysky.configuration.planets.tooltip": "Vénus, Mars, Jupiter et Saturne : des points brillants qui ne scintillent pas et se déplacent d'une nuit à l'autre. Vénus apparaît près de l'horizon au crépuscule ou à l'aube.",
+  "starrysky.configuration.meteorShowers": "Pluies d'étoiles filantes",
+  "starrysky.configuration.meteorShowers.tooltip": "Environ une nuit sur dix, beaucoup plus d'étoiles filantes. Annoncée au crépuscule.",
+  "starrysky.configuration.moonHalo": "Halo de lune",
+  "starrysky.configuration.moonHalo.tooltip": "Une lueur douce autour de la lune, plus forte à la pleine lune. La pleine lune pâlit aussi un peu les étoiles et la Voie lactée.",
+
+  "starrysky.configuration.hideCloudsAtNight": "Effacer les nuages la nuit",
+  "starrysky.configuration.hideCloudsAtNight.tooltip": "Les nuages s'effacent progressivement à la tombée de la nuit et reviennent à l'aube, pour que rien ne cache les étoiles. Ils restent quand il pleut ou qu'il neige.",
+
+  "key.categories.starrysky": "Starry Sky",
+  "key.starrysky.journal": "Carnet d'observation",
+
+  "starrysky.journal.title": "Carnet d'observation",
+  "starrysky.journal.counter": "%s / %s observés",
+  "starrysky.journal.empty": "Rien d'observé pour l'instant. La nuit, gardez une étoile brillante ou une planète au centre de la longue-vue un court instant pour l'ajouter ici.",
+  "starrysky.journal.new_discovery": "Nouvelle découverte",
+
+  "starrysky.shower.announce": "Une pluie d'étoiles filantes illumine le ciel cette nuit",
+
+  "starrysky.planet.venus": "Vénus",
+  "starrysky.planet.mars": "Mars",
+  "starrysky.planet.jupiter": "Jupiter",
+  "starrysky.planet.saturn": "Saturne",
+  "starrysky.planet_type.terrestrial": "Planète rocheuse",
+  "starrysky.planet_type.gas_giant": "Géante gazeuse",
+  "starrysky.telescope.type_label": "Type",
+  "starrysky.telescope.au": "%s UA",
+  "starrysky.telescope.type.m": "Supergéante rouge",
+
   "starrysky.telescope.class": "Classe",
   "starrysky.telescope.magnitude": "Magnitude",
   "starrysky.telescope.distance": "Distance",

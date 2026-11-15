@@ -5,6 +5,7 @@ import fr.evan.starrysky.render.SkyRenderHandler;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /**
  * Seul mixin du mod : masque les étoiles de base de Minecraft.
@@ -34,5 +35,19 @@ public abstract class LevelRendererMixin {
             require = 0)
     private float starrysky$hideVanillaStars(float original) {
         return SkyRenderHandler.shouldHideVanillaStars() ? 0.0F : original;
+    }
+
+    /**
+     * Fondu des nuages à la tombée de la nuit : les nuages du jeu de base sont dessinés avec une opacité de 0,8,
+     * fixée par {@code RenderSystem.setShaderColor(r, g, b, 0.8)} ; on la multiplie par le facteur de fondu.
+     * Seules les valeurs inférieures à 1 sont touchées, pour ne pas modifier la remise à zéro (1, 1, 1, 1) qui suit.
+     */
+    @ModifyArg(
+            method = "renderClouds",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"),
+            index = 3,
+            require = 0)
+    private float starrysky$fadeClouds(float alpha) {
+        return alpha < 0.999F ? alpha * SkyRenderHandler.cloudFactor() : alpha;
     }
 }

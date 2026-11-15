@@ -8,9 +8,14 @@ import java.util.List;
  * Catalogue des étoiles brillantes du ciel de Starry Sky, rempli par {@link fr.evan.starrysky.render.StarField} à
  * chaque (re)construction du champ d'étoiles.
  * <p>
- * Le ciel du mod est imaginaire : les étoiles sont placées au hasard (avec une graine fixe). Les plus brillantes
- * reçoivent le nom d'une vraie étoile, dans l'ordre de génération, et les autres une désignation de catalogue.
- * La constellation dépend de la région du ciel, donc des étoiles voisines appartiennent à la même constellation.
+ * Il contient deux sortes d'étoiles :
+ * <ul>
+ *     <li>les étoiles des <b>vraies constellations</b> (Orion, Grande Ourse…), placées à la main avec leurs vraies
+ *     caractéristiques ({@link fr.evan.starrysky.render.Constellations}) ;</li>
+ *     <li>les étoiles brillantes tirées au hasard (graine fixe) : les plus lumineuses reçoivent le nom d'une vraie
+ *     étoile, les autres une désignation de catalogue. Leur constellation dépend de la région du ciel.</li>
+ * </ul>
+ * Les planètes, qui bougent d'une nuit à l'autre, sont gérées à part ({@link fr.evan.starrysky.render.Planets}).
  */
 public final class StarCatalog {
     /** Au-dessus de cette « magnitude interne » (0 à 1), une étoile entre dans le catalogue. Environ 20 % des étoiles. */
@@ -18,25 +23,28 @@ public final class StarCatalog {
     /** Au-dessus de celle-ci (les étoiles à éclats, environ 3 %), elle reçoit un nom propre. */
     public static final float NAMED_THRESHOLD = 0.92F;
 
-    /** Noms de vraies étoiles brillantes, attribués aux étoiles les plus lumineuses du ciel du mod. */
+    /**
+     * Noms de vraies étoiles, attribués aux étoiles les plus lumineuses tirées au hasard.
+     * Les étoiles des constellations dessinées (Véga, Rigel, Dubhe…) n'y figurent pas : elles ont leur vraie place.
+     */
     private static final String[] NAMES = {
-            "Sirius", "Vega", "Rigel", "Arcturus", "Capella", "Procyon", "Achernar", "Betelgeuse", "Altair",
-            "Aldebaran", "Antares", "Spica", "Pollux", "Fomalhaut", "Deneb", "Regulus", "Adhara", "Castor",
-            "Shaula", "Bellatrix", "Elnath", "Miaplacidus", "Alnilam", "Alnair", "Alnitak", "Alioth", "Dubhe",
-            "Mirfak", "Wezen", "Sargas", "Kaus Australis", "Avior", "Alkaid", "Menkalinan", "Atria", "Alhena",
-            "Peacock", "Polaris", "Mirzam", "Alphard", "Hamal", "Algieba", "Diphda", "Nunki", "Menkent", "Mirach",
-            "Alpheratz", "Rasalhague", "Kochab", "Saiph", "Denebola", "Algol", "Tiaki", "Muhlifain", "Aspidiske",
-            "Suhail", "Alphecca", "Mintaka", "Sadr", "Eltanin", "Schedar", "Naos", "Almach", "Caph", "Izar",
-            "Enif", "Scheat", "Markab", "Mizar", "Alderamin", "Rasalgethi", "Zubenelgenubi", "Unukalhai",
-            "Sabik", "Albireo", "Vindemiatrix", "Gienah", "Acrux", "Mimosa", "Hadar", "Canopus", "Gacrux"
+            "Sirius", "Arcturus", "Capella", "Procyon", "Achernar", "Altair", "Aldebaran", "Antares", "Spica",
+            "Pollux", "Fomalhaut", "Regulus", "Adhara", "Castor", "Shaula", "Elnath", "Miaplacidus", "Alnair",
+            "Mirfak", "Wezen", "Sargas", "Kaus Australis", "Avior", "Menkalinan", "Atria", "Alhena", "Peacock",
+            "Polaris", "Mirzam", "Alphard", "Hamal", "Algieba", "Diphda", "Nunki", "Menkent", "Mirach", "Alpheratz",
+            "Rasalhague", "Kochab", "Denebola", "Algol", "Tiaki", "Muhlifain", "Aspidiske", "Suhail", "Alphecca",
+            "Eltanin", "Naos", "Almach", "Izar", "Enif", "Scheat", "Markab", "Alderamin", "Rasalgethi",
+            "Zubenelgenubi", "Unukalhai", "Sabik", "Vindemiatrix", "Acrux", "Mimosa", "Hadar", "Canopus", "Gacrux",
+            "Ankaa", "Acamar", "Zosma", "Thuban", "Alcyone", "Algenib", "Arneb", "Nihal", "Phact", "Wazn", "Ascella",
+            "Kornephoros", "Sheratan", "Menkar", "Zaurak", "Cursa", "Talitha", "Tarazed", "Sadalmelik", "Sadalsuud",
+            "Skat", "Porrima"
     };
 
-    /** Constellations (noms latins, identiques dans toutes les langues). */
+    /** Constellations des régions du ciel (noms latins). Celles qui sont dessinées en vrai n'y figurent pas. */
     private static final String[] CONSTELLATIONS = {
-            "Andromeda", "Aquila", "Aries", "Auriga", "Bootes", "Canis Major", "Carina", "Cassiopeia",
-            "Centaurus", "Cepheus", "Corona Borealis", "Cygnus", "Draco", "Gemini", "Hercules", "Leo", "Lyra",
-            "Orion", "Pegasus", "Perseus", "Sagittarius", "Scorpius", "Taurus", "Ursa Major", "Ursa Minor",
-            "Virgo", "Libra", "Ophiuchus", "Crux", "Pavo", "Eridanus", "Hydra"
+            "Andromeda", "Aquila", "Aries", "Auriga", "Bootes", "Canis Major", "Carina", "Centaurus", "Cepheus",
+            "Corona Borealis", "Draco", "Gemini", "Hercules", "Leo", "Pegasus", "Perseus", "Sagittarius", "Scorpius",
+            "Taurus", "Ursa Minor", "Virgo", "Libra", "Ophiuchus", "Crux", "Pavo", "Eridanus", "Hydra"
     };
 
     private static volatile List<CatalogStar> stars = List.of();
@@ -62,13 +70,18 @@ public final class StarCatalog {
         private Builder() {
         }
 
+        /** Ajoute une étoile aux caractéristiques connues (étoile d'une constellation dessinée). */
+        public void addFixed(CatalogStar star) {
+            list.add(star);
+        }
+
         /**
-         * Propose une étoile au catalogue. Appelé pour <b>chaque</b> étoile générée, dans l'ordre, afin que la
+         * Propose une étoile tirée au hasard. Appelé pour <b>chaque</b> étoile générée, dans l'ordre, afin que la
          * numérotation reste stable.
          *
-         * @param strength  magnitude interne de l'étoile, de 0 (faible) à 1 (très brillante)
-         * @param tintKind  0 = blanche, 1 = bleutée, 2 = jaune pâle
-         * @param seed      valeur aléatoire propre à l'étoile (0 à 1)
+         * @param strength magnitude interne de l'étoile, de 0 (faible) à 1 (très brillante)
+         * @param tintKind 0 = blanche, 1 = bleutée, 2 = jaune pâle
+         * @param seed     valeur aléatoire propre à l'étoile (0 à 1)
          */
         public void offer(float x, float y, float z, float strength, int tintKind, float seed) {
             int id = index++;
@@ -77,25 +90,18 @@ public final class StarCatalog {
             }
             int h = mix(id * 0x9E3779B9 + 0x51ED27);
 
-            String name;
             boolean named = strength >= NAMED_THRESHOLD && namedCount < NAMES.length;
-            if (named) {
-                name = NAMES[namedCount++];
-            } else {
-                name = "HIP " + (10000 + Integer.remainderUnsigned(h, 110000));
-            }
+            String name = named ? NAMES[namedCount++] : "HIP " + (10000 + Integer.remainderUnsigned(h, 110000));
 
             // Classe spectrale cohérente avec la couleur affichée.
             float pick = ((h >>> 8) & 0xFFFF) / 65536.0F;
-            char spectral;
-            float hot; // 0 = bas de la fourchette de température de la classe, 1 = haut
-            switch (tintKind) {
-                case 1 -> spectral = strength > 0.85F || pick < 0.35F ? 'B' : 'A';
-                case 2 -> spectral = pick < 0.5F ? 'G' : 'K';
-                default -> spectral = pick < 0.55F ? 'A' : 'F';
-            }
+            char spectral = switch (tintKind) {
+                case 1 -> strength > 0.85F || pick < 0.35F ? 'B' : 'A';
+                case 2 -> pick < 0.5F ? 'G' : 'K';
+                default -> pick < 0.55F ? 'A' : 'F';
+            };
             int subclass = (int) (seed * 10.0F) % 10;
-            hot = 1.0F - subclass / 9.0F;
+            float hot = 1.0F - subclass / 9.0F;
             int temperature = switch (spectral) {
                 case 'B' -> lerp(10500, 28000, hot);
                 case 'A' -> lerp(7500, 10000, hot);
@@ -110,8 +116,8 @@ public final class StarCatalog {
             float d = ((h >>> 4) & 0xFFFF) / 65536.0F;
             int distance = Math.max(4, Math.round(4.0F + d * d * 1400.0F * (1.2F - strength)));
 
-            list.add(new CatalogStar(x, y, z, name, named, constellation(x, y, z), spectral, subclass,
-                    magnitude, distance, temperature, color(spectral)));
+            list.add(new CatalogStar(x, y, z, name, named, constellationAt(x, y, z), spectral, subclass,
+                    magnitude, distance, temperature, colorOf(spectral), null, null, 0.0F));
         }
 
         /** Publie le catalogue construit (remplace l'ancien d'un coup). */
@@ -121,7 +127,7 @@ public final class StarCatalog {
     }
 
     /** Constellation de la région du ciel : la sphère est découpée en 6 bandes × 8 secteurs. */
-    private static String constellation(float x, float y, float z) {
+    public static String constellationAt(float x, float y, float z) {
         double latitude = Math.toDegrees(Math.asin(Math.max(-1.0F, Math.min(1.0F, y))));
         double longitude = Math.toDegrees(Math.atan2(z, x)) + 180.0;
         int band = Math.min(5, (int) ((latitude + 90.0) / 30.0));
@@ -131,13 +137,14 @@ public final class StarCatalog {
     }
 
     /** Couleur d'affichage associée à une classe spectrale. */
-    private static int color(char spectral) {
+    public static int colorOf(char spectral) {
         return switch (spectral) {
             case 'B' -> 0x9DB8FF;
             case 'A' -> 0xCAD7FF;
             case 'F' -> 0xF6F3FF;
             case 'G' -> 0xFFEBC4;
-            default -> 0xFFD2A1;
+            case 'K' -> 0xFFD2A1;
+            default -> 0xFFB08A;
         };
     }
 
@@ -145,7 +152,8 @@ public final class StarCatalog {
         return Math.round(a + (b - a) * t);
     }
 
-    private static int mix(int h) {
+    /** Mélange de bits (hachage entier), utilisé pour tout ce qui doit être « aléatoire » mais reproductible. */
+    public static int mix(int h) {
         h ^= h >>> 16;
         h *= 0x7FEB352D;
         h ^= h >>> 15;

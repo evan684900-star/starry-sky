@@ -70,6 +70,10 @@ public final class TelescopeHud implements LayeredDraw.Layer {
             lockAge = 0.0F;
         }
         lockAge += dt;
+        // Garder l'astre au centre un court instant l'enregistre dans le carnet d'observation.
+        if (target != null && lockAge >= ObservationJournal.OBSERVE_SECONDS) {
+            ObservationJournal.observe(target);
+        }
         panelAlpha = approach(panelAlpha, target != null ? 1.0F : 0.0F, dt * 7.0F);
         boolean hint = state == TelescopeTargeting.State.SEARCHING || state == TelescopeTargeting.State.TOO_BRIGHT;
         hintAlpha = approach(hintAlpha, hint ? 1.0F : 0.0F, dt * 4.0F);
@@ -87,6 +91,9 @@ public final class TelescopeHud implements LayeredDraw.Layer {
             drawHint(graphics, font, text, width, height, hintAlpha * 0.85F);
         }
         if (shown != null && panelAlpha > 0.02F) {
+            if (target != null && shown.figure() != null) {
+                drawFigure(graphics, shown.figure(), width, height, panelAlpha);
+            }
             if (target != null && TelescopeTargeting.screenPosition(shown, width, height, screen)) {
                 drawReticle(graphics, screen[0], screen[1], shown.color(), panelAlpha);
             }
@@ -115,22 +122,49 @@ public final class TelescopeHud implements LayeredDraw.Layer {
         }
     }
 
+    /**
+     * Traits de la constellation de l'étoile visée : lignes en pointillés entre ses étoiles.
+     * La longue-vue grossit beaucoup : on ne voit souvent qu'une partie de la figure, les traits sortent de l'écran.
+     */
+    private void drawFigure(GuiGraphics graphics, String figure, int width, int height, float alpha) {
+        int color = argb(0xA9C4FF, alpha * 0.45F);
+        float[] a = new float[2];
+        float[] b = new float[2];
+        for (float[] segment : fr.evan.starrysky.render.Constellations.segments(figure)) {
+            if (!TelescopeTargeting.screenPosition(segment[0], segment[1], segment[2], width, height, a)
+                    || !TelescopeTargeting.screenPosition(segment[3], segment[4], segment[5], width, height, b)) {
+                continue;
+            }
+            float dx = b[0] - a[0];
+            float dy = b[1] - a[1];
+            float length = (float) Math.sqrt(dx * dx + dy * dy);
+            // Points tous les 4 pixels, en laissant un espace autour des étoiles ; limité pour rester léger.
+            int steps = (int) Math.min(800.0F, length / 4.0F);
+            for (int i = 2; i < steps - 1; i++) {
+                float t = i / (float) steps;
+                int x = Math.round(a[0] + dx * t);
+                int y = Math.round(a[1] + dy * t);
+                if (x >= 0 && y >= 0 && x < width && y < height) {
+                    graphics.fill(x, y, x + 1, y + 1, color);
+                }
+            }
+        }
+    }
+
     private void drawPanel(GuiGraphics graphics, Font font, CatalogStar star, int width, int height, float alpha) {
-        Locale locale = gameLocale();
-        Component title = Component.literal(star.name()).withStyle(ChatFormatting.BOLD);
+        Component title = StarText.name(star).copy().withStyle(ChatFormatting.BOLD);
         Component subtitle = Component.literal(star.constellation());
 
         Component[] labels = {
-                Component.translatable("starrysky.telescope.class"),
+                StarText.typeLabel(star),
                 Component.translatable("starrysky.telescope.magnitude"),
                 Component.translatable("starrysky.telescope.distance"),
                 Component.translatable("starrysky.telescope.temperature")};
         Component[] values = {
-                Component.literal(star.spectralClass() + "" + star.subclass() + " · ")
-                        .append(Component.translatable("starrysky.telescope.type." + Character.toLowerCase(star.spectralClass()))),
-                Component.literal(String.format(locale, "%.1f", star.magnitude())),
-                Component.translatable("starrysky.telescope.lightyears", formatInt(star.distanceLy(), locale)),
-                Component.literal(formatInt(star.temperatureK(), locale) + " K")};
+                StarText.type(star),
+                StarText.magnitude(star),
+                StarText.distance(star),
+                StarText.temperature(star)};
         ResourceLocation[] icons = {ICON_SPECTRUM, ICON_MAGNITUDE, ICON_DISTANCE, ICON_TEMPERATURE};
 
         // Largeur : assez pour la ligne la plus longue.
@@ -177,6 +211,18 @@ public final class TelescopeHud implements LayeredDraw.Layer {
             graphics.drawString(font, labels[i], hx + 13, y + 1, argb(LABEL, alpha), false);
             int valueX = x1 - PADDING - font.width(values[i]);
             graphics.drawString(font, values[i], valueX, y + 1, argb(VALUE, alpha), false);
+        }
+
+        // Badge « Nouvelle découverte » au-dessus du panneau, quelques secondes après la première observation.
+        if (ObservationJournal.isFreshDiscovery(star.name())) {
+            Component badge = Component.translatable("starrysky.journal.new_discovery");
+            int bw = 9 + 5 + font.width(badge) + 12;
+            int bx = (width - bw) / 2;
+            int by = y0 - 17;
+            graphics.fill(bx, by, bx + bw, by + 13, argb(0x2A2210, alpha * 0.9F));
+            hLine(graphics, bx, bx + bw - 1, by, argb(0xE8C77A, alpha * 0.6F));
+            icon(graphics, ICON_MAGNITUDE, bx + 6, by + 2, 9, 0xE8C77A, alpha);
+            graphics.drawString(font, badge, bx + 19, by + 3, argb(0xF4DFA6, alpha), false);
         }
     }
 
