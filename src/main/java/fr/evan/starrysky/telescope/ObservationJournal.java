@@ -17,7 +17,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.sounds.SoundEvents;
 
 /**
- * Carnet d'observation : les astres déjà observés à la longue-vue.
+ * Carnet d'observation : les astres déjà observés à la longue-vue, et les succès débloqués.
  * <p>
  * Un astre est « découvert » quand on le garde au centre de la longue-vue pendant {@link #OBSERVE_SECONDS} secondes.
  * Les découvertes sont enregistrées <b>sur ton ordinateur</b>, un fichier par monde solo ou par serveur, dans
@@ -29,7 +29,11 @@ public final class ObservationJournal {
     /** Durée d'affichage du badge « Nouvelle découverte ». */
     public static final long BADGE_MILLIS = 3500L;
 
+    /** Préfixe des lignes du fichier qui enregistrent un succès (les autres lignes sont des astres). */
+    private static final String ACHIEVEMENT_PREFIX = "@";
+
     private static final Set<String> discovered = new LinkedHashSet<>();
+    private static final Set<String> achievements = new LinkedHashSet<>();
     @Nullable
     private static String loadedFor;
     @Nullable
@@ -71,15 +75,83 @@ public final class ObservationJournal {
         lastDiscoveryAt = System.currentTimeMillis();
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.6F, 0.6F));
+        append(star.name());
+        if (star.isComet()) {
+            unlock(Achievement.COMET);
+        }
+        checkAchievements();
+        return true;
+    }
+
+    /** Vrai si ce succès est débloqué dans ce monde. */
+    public static boolean isUnlocked(Achievement achievement) {
+        ensureLoaded();
+        return achievements.contains(achievement.id());
+    }
+
+    /** Nombre de succès débloqués dans ce monde. */
+    public static int unlockedCount() {
+        ensureLoaded();
+        int count = 0;
+        for (Achievement achievement : Achievement.values()) {
+            if (achievements.contains(achievement.id())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** Débloque un succès (s'il ne l'est pas déjà) : notification, son, et enregistrement dans le carnet. */
+    public static void unlock(Achievement achievement) {
+        ensureLoaded();
+        if (loadedFor == null || !achievements.add(achievement.id())) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.getToasts().addToast(new AchievementToast(achievement));
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 1.4F, 0.5F));
+        append(ACHIEVEMENT_PREFIX + achievement.id());
+    }
+
+    /** Débloque les succès liés au nombre d'astres observés dont l'objectif est atteint. */
+    public static void checkAchievements() {
+        ensureLoaded();
+        // Tant que le ciel n'est pas construit (catalogue vide), les objectifs ne veulent rien dire.
+        if (loadedFor == null || StarCatalog.stars().isEmpty()) {
+            return;
+        }
+        for (Achievement achievement : Achievement.values()) {
+            if (!achievement.isEvent() && !achievements.contains(achievement.id())
+                    && achievement.progress() >= achievement.goal()) {
+                unlock(achievement);
+            }
+        }
+    }
+
+    /** Noms des comètes observées dans ce monde (elles ne restent pas dans le ciel, donc pas dans le catalogue). */
+    public static List<String> discoveredComets() {
+        ensureLoaded();
+        List<String> comets = new java.util.ArrayList<>();
+        for (String name : discovered) {
+            if (name.startsWith("C/")) {
+                comets.add(name);
+            }
+        }
+        return comets;
+    }
+
+    private static void append(String line) {
+        if (loadedFor == null) {
+            return;
+        }
         try {
             Path file = file(loadedFor);
             Files.createDirectories(file.getParent());
-            Files.writeString(file, star.name() + System.lineSeparator(), StandardCharsets.UTF_8,
+            Files.writeString(file, line + System.lineSeparator(), StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             StarrySky.LOGGER.warn("Starry Sky : impossible d'enregistrer le carnet d'observation", e);
         }
-        return true;
     }
 
     /** Vrai si cet astre vient d'être découvert (pour afficher le badge quelques secondes). */
@@ -93,6 +165,7 @@ public final class ObservationJournal {
         if (id == null) {
             loadedFor = null;
             discovered.clear();
+            achievements.clear();
             return;
         }
         if (id.equals(loadedFor)) {
@@ -100,13 +173,16 @@ public final class ObservationJournal {
         }
         loadedFor = id;
         discovered.clear();
+        achievements.clear();
         lastDiscovery = null;
         Path file = file(id);
         if (Files.isRegularFile(file)) {
             try {
                 for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
                     String name = line.trim();
-                    if (!name.isEmpty()) {
+                    if (name.startsWith(ACHIEVEMENT_PREFIX)) {
+                        achievements.add(name.substring(ACHIEVEMENT_PREFIX.length()));
+                    } else if (!name.isEmpty()) {
                         discovered.add(name);
                     }
                 }

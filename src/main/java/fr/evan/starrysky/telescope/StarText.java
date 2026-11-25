@@ -13,7 +13,7 @@ public final class StarText {
 
     /** Nom affiché : les planètes sont traduites (Vénus, Saturne…), les étoiles gardent leur nom propre. */
     public static Component name(CatalogStar star) {
-        return star.isPlanet()
+        return star.isPlanet() && !star.isComet()
                 ? Component.translatable("starrysky.planet." + star.name().toLowerCase(Locale.ROOT))
                 : Component.literal(star.name());
     }

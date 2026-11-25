@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fr.evan.starrysky.config.StarrySkyConfig;
+import fr.evan.starrysky.telescope.Achievement;
+import fr.evan.starrysky.telescope.ObservationJournal;
 import fr.evan.starrysky.telescope.StarCatalog;
 import fr.evan.starrysky.telescope.TelescopeTargeting;
 import net.minecraft.network.chat.Component;
@@ -34,7 +36,7 @@ import org.joml.Matrix4f;
  * <p>
  * <b>Performances.</b> Ce code s'exécute à chaque image : il ne crée aucun objet (les matrices sont réutilisées),
  * ne régénère aucune étoile, et se limite à 3 appels de dessin au maximum (lueur, étoiles, étoiles filantes)
- * sur des maillages déjà stockés dans la carte graphique. Le jour, sous la pluie ou sous terre, rien n'est dessiné.
+ * sur des maillages déjà stockés dans la carte graphique (deux de plus les nuits où une comète est visible). Le jour, sous la pluie ou sous terre, rien n'est dessiné.
  */
 public final class SkyRenderHandler {
     /** Force du scintillement (0 = aucun ; 1 = l'étoile peut presque s'éteindre). 0,4 = léger. */
@@ -48,6 +50,16 @@ public final class SkyRenderHandler {
     private static final AuroraBorealis AURORA = new AuroraBorealis();
     private static final Planets PLANETS = new Planets();
     private static final MoonHalo MOON_HALO = new MoonHalo();
+    private static final Comet COMET = new Comet();
+
+    /** Avancement de l'éclipse de lune en cours (0 = aucune, 1 = totalité), lu par le mixin du ciel. */
+    private static volatile float eclipse;
+    private static final float[] MOON_TINT = new float[3];
+    /** Pendant la totalité, regarder la lune à moins de 25° débloque le succès « Lune de sang ». */
+    private static final float ECLIPSE_LOOK_COS = (float) Math.cos(Math.toRadians(25.0));
+    /** Les succès liés au ciel (aurores, pluie d'étoiles filantes, éclipse) sont vérifiés une fois par seconde. */
+    private static final float EVENT_CHECK_INTERVAL = 1.0F;
+    private static float eventCheckTimer;
 
     /** Intensité maximale du halo de lune (à la pleine lune). */
     private static final float MOON_HALO_PEAK = 0.22F;
@@ -61,8 +73,22 @@ public final class SkyRenderHandler {
         return cloudFactor;
     }
 
-    /** Dernière nuit pour laquelle la pluie d'étoiles filantes a été annoncée. */
-    private static long announcedShowerNight = Long.MIN_VALUE;
+    /**
+     * Teinte à appliquer à la lune de base pendant une éclipse ({r, g, b}), ou null s'il n'y a pas d'éclipse.
+     * Appelé par {@link fr.evan.starrysky.mixin.LevelRendererMixin} juste avant le dessin de la lune.
+     */
+    @Nullable
+    public static float[] moonTint() {
+        float e = eclipse;
+        if (e <= 0.0F) {
+            return null;
+        }
+        LunarEclipse.moonTint(e, MOON_TINT);
+        return MOON_TINT;
+    }
+
+    /** Dernière nuit pour laquelle un événement (éclipse, comète, pluie d'étoiles filantes) a été annoncé. */
+    private static long announcedNight = Long.MIN_VALUE;
 
     /** Intensité maximale des aurores. */
     private static final float AURORA_PEAK = 0.85F;
@@ -105,6 +131,7 @@ public final class SkyRenderHandler {
         ClientLevel level = minecraft.level;
         if (level != lastLevel) {
             SHOOTING_STARS.clear();
+            COMET.clear();
             lastLevel = level;
             // Nouveau monde : pas de fondu, l'état du biome est réévalué tout de suite.
             biomeCheckTimer = 0.0F;
@@ -116,6 +143,7 @@ public final class SkyRenderHandler {
         if (level == null || starShader == null || milkyWayShader == null || shootingStarShader == null || !isActiveIn(level)) {
             SHOOTING_STARS.clear();
             cloudFactor = 1.0F;
+            eclipse = 0.0F;
             return;
         }
 
@@ -130,6 +158,12 @@ public final class SkyRenderHandler {
         if (planets) {
             PLANETS.update(level.getDayTime(), StarrySkyConfig.COLORED_STARS.get());
         }
+        boolean comets = StarrySkyConfig.COMETS.get();
+        if (comets) {
+            COMET.update(level.getDayTime());
+        } else {
+            COMET.clear();
+        }
         boolean moonHalo = StarrySkyConfig.MOON_HALO.get();
         if (moonHalo) {
             MOON_HALO.buildIfNeeded();
@@ -137,6 +171,8 @@ public final class SkyRenderHandler {
 
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         float visibility = starVisibility(level, partialTick);
+        eclipse = StarrySkyConfig.ECLIPSES.get()
+                ? LunarEclipse.factor(level.getDayTime(), partialTick, level.getMoonPhase()) : 0.0F;
         // Nuages : ils s'effacent à mesure que la nuit tombe (et reviennent à l'aube), mais restent quand il pleut.
         cloudFactor = StarrySkyConfig.HIDE_CLOUDS_AT_NIGHT.get() ? 1.0F - visibility : 1.0F;
         // Une nuit va du coucher du soleil (12000) au lever (24000) : même numéro pendant toute la nuit.
@@ -157,10 +193,6 @@ public final class SkyRenderHandler {
         if (shower) {
             SHOOTING_STARS.update(minecraft.isPaused() ? 0.0F : deltaSeconds, visibility, true,
                     Math.max(15.0F, frequency * 6.0F), 6);
-            if (visibility > 0.3F && announcedShowerNight != night) {
-                announcedShowerNight = night;
-                minecraft.gui.setOverlayMessage(Component.translatable("starrysky.shower.announce"), false);
-            }
         } else {
             SHOOTING_STARS.update(minecraft.isPaused() ? 0.0F : deltaSeconds, visibility, shootingStars, frequency);
         }
@@ -175,6 +207,23 @@ public final class SkyRenderHandler {
 
         // Longue-vue : n'est utile que si le ciel est assez sombre.
         boolean skyVisible = isSkyVisible(minecraft, level, event.getCamera());
+
+        // Annonce au crépuscule (une seule par nuit) : éclipse de lune, puis comète, puis pluie d'étoiles filantes.
+        boolean eclipseNight = StarrySkyConfig.ECLIPSES.get() && LunarEclipse.isEclipseNight(level.getDayTime(), level.getMoonPhase());
+        if (visibility > 0.3F && announcedNight != night) {
+            announcedNight = night;
+            Component announce = null;
+            if (eclipseNight) {
+                announce = Component.translatable("starrysky.eclipse.announce");
+            } else if (comets && !Comet.catalog().isEmpty()) {
+                announce = Component.translatable("starrysky.comet.announce", Comet.catalog().get(0).name());
+            } else if (shower) {
+                announce = Component.translatable("starrysky.shower.announce");
+            }
+            if (announce != null) {
+                minecraft.gui.setOverlayMessage(announce, false);
+            }
+        }
         boolean telescope = StarrySkyConfig.TELESCOPE.get() && TelescopeTargeting.isScoping(minecraft);
         if (telescope && (visibility < TelescopeTargeting.MIN_VISIBILITY || !skyVisible)) {
             TelescopeTargeting.markTooBright();
@@ -189,7 +238,8 @@ public final class SkyRenderHandler {
         float brightness = StarrySkyConfig.BRIGHTNESS.get().floatValue();
         float intensity = visibility * brightness;
         // La lune éclaire le ciel : à la pleine lune, les étoiles pâlissent un peu et la Voie lactée davantage.
-        float moonBrightness = level.getMoonBrightness();
+        // Pendant une éclipse, la lune s'éteint presque : le ciel redevient bien noir.
+        float moonBrightness = level.getMoonBrightness() * (1.0F - 0.85F * eclipse);
         float starIntensity = intensity * (1.0F - 0.25F * moonBrightness);
 
         // Même rotation que le soleil, la lune et les étoiles de base (voir LevelRenderer#renderSky) :
@@ -201,7 +251,14 @@ public final class SkyRenderHandler {
         Matrix4f projection = event.getProjectionMatrix();
 
         if (telescope) {
-            TelescopeTargeting.update(SKY_ROTATION, STAR_VIEW, projection, event.getCamera().getLookVector(), planets);
+            TelescopeTargeting.update(SKY_ROTATION, STAR_VIEW, projection, event.getCamera().getLookVector(), planets, comets);
+        }
+
+        // Succès liés au ciel : vérifiés une fois par seconde seulement (la lecture du carnet n'est pas gratuite).
+        eventCheckTimer -= deltaSeconds;
+        if (eventCheckTimer <= 0.0F) {
+            eventCheckTimer = EVENT_CHECK_INTERVAL;
+            checkSkyEvents(event.getCamera(), visibility, shower, auroras);
         }
 
         // État de rendu : la lumière s'ajoute au ciel (les shaders produisent une couleur déjà multipliée par leur
@@ -224,11 +281,23 @@ public final class SkyRenderHandler {
             }
         }
 
+        // 1 bis) Comète : chevelure et queues (même shader que la Voie lactée).
+        if (comets && COMET.envelope() > 0.0F) {
+            float glow = intensity * visibility * Comet.GLOW_PEAK * COMET.envelope() * (1.0F - 0.3F * moonBrightness);
+            if (glow >= MIN_GLOW) {
+                RenderSystem.setShaderColor(glow, glow, glow, 1.0F);
+                milkyWayShader.safeGetUniform("SkyMat").set(SKY_ROTATION);
+                COMET.drawGlow(STAR_VIEW, projection, milkyWayShader);
+            }
+        }
+
         // 1 bis) Halo de lune (même shader que la Voie lactée), plus fort quand la lune est pleine.
+        // Pendant une éclipse, il faiblit et prend la teinte cuivrée de la lune.
         if (moonHalo) {
-            float halo = MOON_HALO_PEAK * moonBrightness * visibility * brightness;
+            float halo = MOON_HALO_PEAK * level.getMoonBrightness() * visibility * brightness * (1.0F - 0.6F * eclipse);
             if (halo >= MIN_GLOW) {
-                RenderSystem.setShaderColor(halo, halo, halo, 1.0F);
+                LunarEclipse.moonTint(eclipse, MOON_TINT);
+                RenderSystem.setShaderColor(halo * MOON_TINT[0], halo * MOON_TINT[1], halo * MOON_TINT[2], 1.0F);
                 milkyWayShader.safeGetUniform("SkyMat").set(SKY_ROTATION);
                 MOON_HALO.draw(STAR_VIEW, projection, milkyWayShader);
             }
@@ -267,6 +336,12 @@ public final class SkyRenderHandler {
             starShader.safeGetUniform("TwinkleAmount").set(0.0F);
             PLANETS.draw(STAR_VIEW, projection, starShader);
         }
+        // 2 ter) Noyau de la comète : même shader, sans scintillement non plus.
+        if (comets && COMET.envelope() > 0.0F) {
+            RenderSystem.setShaderColor(intensity, intensity, intensity, 1.0F);
+            starShader.safeGetUniform("TwinkleAmount").set(0.0F);
+            COMET.drawNucleus(STAR_VIEW, projection, starShader);
+        }
 
         // 3) Étoiles filantes : dans le repère du monde (sans la rotation du ciel).
         SHOOTING_STARS.render(cameraView, projection, shootingStarShader, intensity);
@@ -277,6 +352,29 @@ public final class SkyRenderHandler {
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
         RenderSystem.depthMask(true);
+    }
+
+    /**
+     * Débloque les succès d'événements du ciel : pluie d'étoiles filantes, aurores bien visibles, et éclipse totale
+     * (en regardant la lune). Appelé une fois par seconde, seulement quand le ciel est visible.
+     */
+    private static void checkSkyEvents(Camera camera, float visibility, boolean shower, boolean auroras) {
+        if (shower && visibility > 0.5F) {
+            ObservationJournal.unlock(Achievement.SHOWER);
+        }
+        if (auroras && auroraFactor * visibility * visibility > 0.5F) {
+            ObservationJournal.unlock(Achievement.AURORA);
+        }
+        if (eclipse >= 0.99F) {
+            // Direction de la lune dans le monde : la rotation du ciel appliquée à (0, -1, 0).
+            float mx = -SKY_ROTATION.m10();
+            float my = -SKY_ROTATION.m11();
+            float mz = -SKY_ROTATION.m12();
+            org.joml.Vector3f look = camera.getLookVector();
+            if (my > 0.0F && mx * look.x + my * look.y + mz * look.z > ECLIPSE_LOOK_COS) {
+                ObservationJournal.unlock(Achievement.ECLIPSE);
+            }
+        }
     }
 
     /**

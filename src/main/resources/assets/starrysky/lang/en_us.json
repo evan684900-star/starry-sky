@@ -1,66 +1,47 @@
 {
   "fml.menu.mods.info.description.starrysky": "A more beautiful night sky: more stars, varied sizes and colors, gentle twinkling and shooting stars. Client-side only.",
-
   "starrysky.configuration.title": "Starry Sky Configuration",
   "starrysky.configuration.section.starrysky.client.toml": "Starry Sky Settings",
   "starrysky.configuration.section.starrysky.client.toml.title": "Starry Sky Settings",
-
   "starrysky.configuration.enabled": "Enable Starry Sky",
   "starrysky.configuration.enabled.tooltip": "Turns the improved night sky on or off.",
-
   "starrysky.configuration.starCount": "Star Count",
   "starrysky.configuration.starCount.tooltip": "Number of stars on the celestial sphere. Vanilla shows about 800. The Milky Way adds twice as many tiny stars on top. Even 10000 stays cheap to draw.",
-
   "starrysky.configuration.starSize": "Star Size",
   "starrysky.configuration.starSize.tooltip": "Size multiplier applied to every star.",
-
   "starrysky.configuration.brightness": "Brightness",
   "starrysky.configuration.brightness.tooltip": "Overall brightness of the stars.",
-
   "starrysky.configuration.coloredStars": "Colored Stars",
   "starrysky.configuration.coloredStars.tooltip": "Adds subtle color variations: white, bluish and pale yellow stars.",
-
   "starrysky.configuration.twinkle": "Twinkle",
   "starrysky.configuration.twinkle.tooltip": "Makes the stars gently twinkle over time.",
-
   "starrysky.configuration.twinkleSpeed": "Twinkle Speed",
   "starrysky.configuration.twinkleSpeed.tooltip": "Speed of the twinkling animation.",
-
   "starrysky.configuration.shootingStars": "Shooting Stars",
   "starrysky.configuration.shootingStars.tooltip": "Occasional shooting stars streak across the night sky.",
-
   "starrysky.configuration.shootingStarFrequency": "Shooting Star Frequency",
   "starrysky.configuration.shootingStarFrequency.tooltip": "Average number of shooting stars per minute on a clear night. 0 disables them.",
-
   "starrysky.configuration.milkyWay": "Milky Way",
   "starrysky.configuration.milkyWay.tooltip": "A glowing band of star dust crosses the night sky. This is the most demanding effect of the mod, although still light: turn it off first if the game slows down when you look at the night sky.",
-
   "starrysky.configuration.auroras": "Northern Lights",
   "starrysky.configuration.auroras.tooltip": "Curtains of green and violet light dance in the northern sky at night, only in cold biomes (snow, ice).",
-
-  "starrysky.configuration.telescope":"Spyglass Star Info",
+  "starrysky.configuration.telescope": "Spyglass Star Info",
   "starrysky.configuration.telescope.tooltip": "Aim a spyglass at a bright star at night to see its name and characteristics.",
-
   "starrysky.configuration.planets": "Planets",
   "starrysky.configuration.planets.tooltip": "Venus, Mars, Jupiter and Saturn: bright, steady points that move from one night to the next. Venus shows up near the horizon at dusk or dawn.",
   "starrysky.configuration.meteorShowers": "Meteor Showers",
   "starrysky.configuration.meteorShowers.tooltip": "About one night in ten, many more shooting stars. Announced at dusk.",
   "starrysky.configuration.moonHalo": "Moon Halo",
   "starrysky.configuration.moonHalo.tooltip": "A soft glow around the moon, stronger at full moon. A full moon also makes the stars and the Milky Way a little paler.",
-
   "starrysky.configuration.hideCloudsAtNight": "Fade Clouds at Night",
   "starrysky.configuration.hideCloudsAtNight.tooltip": "Clouds gradually fade away as night falls and come back at dawn, so nothing hides the stars. They stay when it rains or snows.",
-
   "key.categories.starrysky": "Starry Sky",
   "key.starrysky.journal": "Observation Journal",
-
   "starrysky.journal.title": "Observation Journal",
   "starrysky.journal.counter": "%s / %s observed",
   "starrysky.journal.empty": "Nothing observed yet. At night, hold a spyglass on a bright star or a planet for a moment to add it here.",
   "starrysky.journal.new_discovery": "New discovery",
-
   "starrysky.shower.announce": "A meteor shower lights up the sky tonight",
-
   "starrysky.planet.venus": "Venus",
   "starrysky.planet.mars": "Mars",
   "starrysky.planet.jupiter": "Jupiter",
@@ -70,7 +51,6 @@
   "starrysky.telescope.type_label": "Type",
   "starrysky.telescope.au": "%s AU",
   "starrysky.telescope.type.m": "Red supergiant",
-
   "starrysky.telescope.class": "Class",
   "starrysky.telescope.magnitude": "Magnitude",
   "starrysky.telescope.distance": "Distance",
@@ -83,10 +63,41 @@
   "starrysky.telescope.type.k": "Orange giant",
   "starrysky.telescope.hint.aim": "Aim at a bright star",
   "starrysky.telescope.hint.too_bright": "The sky is too bright to see the stars",
-
   "starrysky.configuration.hideVanillaStars": "Hide Vanilla Stars",
   "starrysky.configuration.hideVanillaStars.tooltip": "Hides Minecraft's original stars wherever Starry Sky is active.",
-
   "starrysky.configuration.dimensions": "Dimensions",
-  "starrysky.configuration.dimensions.tooltip": "Dimension IDs where Starry Sky is active (e.g. minecraft:overworld). Only dimensions with a normal sky are affected: the Nether and the End stay unchanged."
+  "starrysky.configuration.dimensions.tooltip": "Dimension IDs where Starry Sky is active (e.g. minecraft:overworld). Only dimensions with a normal sky are affected: the Nether and the End stay unchanged.",
+  "starrysky.configuration.comets": "Comets",
+  "starrysky.configuration.comets.tooltip": "Every now and then, a comet stays visible for a few nights: a bright nucleus, a greenish coma and two tails (golden dust and blue ions) always pointing away from the sun. Aim at it with a spyglass to add it to your journal!",
+  "starrysky.configuration.eclipses": "Lunar eclipses",
+  "starrysky.configuration.eclipses.tooltip": "On some full-moon nights, the moon darkens and turns copper red around midnight. The darker sky makes the stars stand out.",
+  "starrysky.eclipse.announce": "A lunar eclipse will happen tonight, around midnight",
+  "starrysky.comet.announce": "Comet %s is visible in the sky",
+  "starrysky.planet_type.comet": "Comet",
+  "starrysky.journal.tab.stars": "Sky objects",
+  "starrysky.journal.tab.achievements": "Achievements",
+  "starrysky.journal.achievement_counter": "%s / %s achievements unlocked",
+  "starrysky.achievement.toast": "Astronomer achievement!",
+  "starrysky.achievement.first_light": "First Light",
+  "starrysky.achievement.first_light.desc": "Observe your first sky object with a spyglass",
+  "starrysky.achievement.amateur": "Amateur Astronomer",
+  "starrysky.achievement.amateur.desc": "Observe 25 sky objects",
+  "starrysky.achievement.confirmed": "Seasoned Astronomer",
+  "starrysky.achievement.confirmed.desc": "Observe 100 sky objects",
+  "starrysky.achievement.planets": "Grand Tour",
+  "starrysky.achievement.planets.desc": "Observe Venus, Mars, Jupiter and Saturn",
+  "starrysky.achievement.figure": "Connect the Dots",
+  "starrysky.achievement.figure.desc": "Observe every star of a constellation",
+  "starrysky.achievement.cartographer": "Sky Cartographer",
+  "starrysky.achievement.cartographer.desc": "Complete every constellation",
+  "starrysky.achievement.comet": "Comet Hunter",
+  "starrysky.achievement.comet.desc": "Observe a comet with a spyglass",
+  "starrysky.achievement.eclipse": "Blood Moon",
+  "starrysky.achievement.eclipse.desc": "Look at the moon during a total eclipse",
+  "starrysky.achievement.shower": "Make a Wish",
+  "starrysky.achievement.shower.desc": "Watch a meteor shower",
+  "starrysky.achievement.aurora": "Dancing Lights",
+  "starrysky.achievement.aurora.desc": "See bright northern lights",
+  "starrysky.achievement.master": "Master of the Stars",
+  "starrysky.achievement.master.desc": "Observe every object in the sky"
 }

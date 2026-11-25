@@ -3,7 +3,7 @@ package fr.evan.starrysky.telescope;
 import javax.annotation.Nullable;
 
 /**
- * Un astre identifiable à la longue-vue : une étoile brillante ou une planète.
+ * Un astre identifiable à la longue-vue : une étoile brillante, une planète ou une comète.
  * <p>
  * Toutes les valeurs sont fixées à la génération (graine fixe, ou données des constellations et des planètes) :
  * un même astre a toujours le même nom et les mêmes caractéristiques.
@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
  * @param temperatureK  température de surface en kelvins
  * @param color         couleur de l'astre (0xRRGGBB), utilisée pour l'interface
  * @param figure        figure de constellation dont l'étoile fait partie (traits à la longue-vue), sinon null
- * @param planetType    type de planète (« terrestrial », « gas_giant »), null pour une étoile
+ * @param planetType    type de planète (« terrestrial », « gas_giant », « comet »), null pour une étoile
  * @param distanceAu    distance en unités astronomiques (planètes)
  */
 public record CatalogStar(
@@ -39,5 +39,10 @@ public record CatalogStar(
 
     public boolean isPlanet() {
         return planetType != null;
+    }
+
+    /** Vrai pour une comète (un astre « du système solaire » comme les planètes, mais de passage). */
+    public boolean isComet() {
+        return "comet".equals(planetType);
     }
 }

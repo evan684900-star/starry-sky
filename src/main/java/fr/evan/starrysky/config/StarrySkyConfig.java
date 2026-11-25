@@ -33,6 +33,8 @@ public final class StarrySkyConfig {
     public static final ModConfigSpec.BooleanValue PLANETS;
     public static final ModConfigSpec.BooleanValue METEOR_SHOWERS;
     public static final ModConfigSpec.BooleanValue MOON_HALO;
+    public static final ModConfigSpec.BooleanValue COMETS;
+    public static final ModConfigSpec.BooleanValue ECLIPSES;
     public static final ModConfigSpec.BooleanValue HIDE_CLOUDS_AT_NIGHT;
     public static final ModConfigSpec.BooleanValue HIDE_VANILLA_STARS;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> DIMENSIONS;
@@ -111,6 +113,16 @@ public final class StarrySkyConfig {
                 .comment("Halo lumineux autour de la lune, plus fort à la pleine lune.")
                 .translation(PREFIX + "moonHalo")
                 .define("moonHalo", true);
+
+        COMETS = builder
+                .comment("Comètes : de temps en temps, une comète reste visible quelques nuits, avec sa chevelure et ses deux queues.")
+                .translation(PREFIX + "comets")
+                .define("comets", true);
+
+        ECLIPSES = builder
+                .comment("Éclipses de lune : certaines nuits de pleine lune, la lune devient rouge cuivré vers minuit.")
+                .translation(PREFIX + "eclipses")
+                .define("eclipses", true);
 
         HIDE_CLOUDS_AT_NIGHT = builder
                 .comment("Les nuages s'effacent progressivement à la tombée de la nuit et reviennent à l'aube",

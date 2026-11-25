@@ -1,66 +1,47 @@
 {
   "fml.menu.mods.info.description.starrysky": "Un ciel nocturne plus beau : plus d'étoiles, de tailles et de couleurs variées, scintillement léger et étoiles filantes. Uniquement côté client.",
-
   "starrysky.configuration.title": "Configuration de Starry Sky",
   "starrysky.configuration.section.starrysky.client.toml": "Réglages de Starry Sky",
   "starrysky.configuration.section.starrysky.client.toml.title": "Réglages de Starry Sky",
-
   "starrysky.configuration.enabled": "Activer Starry Sky",
   "starrysky.configuration.enabled.tooltip": "Active ou désactive le ciel étoilé amélioré.",
-
   "starrysky.configuration.starCount": "Nombre d'étoiles",
   "starrysky.configuration.starCount.tooltip": "Nombre d'étoiles sur la voûte céleste. Le jeu de base en affiche environ 800. La Voie lactée ajoute deux fois plus de minuscules étoiles en supplément. Même 10000 reste léger à afficher.",
-
   "starrysky.configuration.starSize": "Taille des étoiles",
   "starrysky.configuration.starSize.tooltip": "Multiplicateur de taille appliqué à toutes les étoiles.",
-
   "starrysky.configuration.brightness": "Luminosité",
   "starrysky.configuration.brightness.tooltip": "Luminosité globale des étoiles.",
-
   "starrysky.configuration.coloredStars": "Étoiles colorées",
   "starrysky.configuration.coloredStars.tooltip": "Ajoute de légères variations de couleur : étoiles blanches, bleutées et jaune pâle.",
-
   "starrysky.configuration.twinkle": "Scintillement",
   "starrysky.configuration.twinkle.tooltip": "Fait scintiller doucement les étoiles au fil du temps.",
-
   "starrysky.configuration.twinkleSpeed": "Vitesse du scintillement",
   "starrysky.configuration.twinkleSpeed.tooltip": "Vitesse de l'animation de scintillement.",
-
   "starrysky.configuration.shootingStars": "Étoiles filantes",
   "starrysky.configuration.shootingStars.tooltip": "Des étoiles filantes traversent parfois le ciel nocturne.",
-
   "starrysky.configuration.shootingStarFrequency": "Fréquence des étoiles filantes",
   "starrysky.configuration.shootingStarFrequency.tooltip": "Nombre moyen d'étoiles filantes par minute par nuit claire. 0 les désactive.",
-
   "starrysky.configuration.milkyWay": "Voie lactée",
   "starrysky.configuration.milkyWay.tooltip": "Une bande lumineuse de poussières d'étoiles traverse le ciel nocturne. C'est l'effet le plus gourmand du mod, même s'il reste léger : à désactiver en premier si le jeu ralentit quand on regarde le ciel la nuit.",
-
   "starrysky.configuration.auroras": "Aurores boréales",
   "starrysky.configuration.auroras.tooltip": "Des rideaux de lumière verte et violette dansent vers le nord la nuit, uniquement dans les biomes froids (neige, glace).",
-
-  "starrysky.configuration.telescope":"Infos des étoiles à la longue-vue",
+  "starrysky.configuration.telescope": "Infos des étoiles à la longue-vue",
   "starrysky.configuration.telescope.tooltip": "Visez une étoile brillante la nuit avec une longue-vue pour afficher son nom et ses caractéristiques.",
-
   "starrysky.configuration.planets": "Planètes",
   "starrysky.configuration.planets.tooltip": "Vénus, Mars, Jupiter et Saturne : des points brillants qui ne scintillent pas et se déplacent d'une nuit à l'autre. Vénus apparaît près de l'horizon au crépuscule ou à l'aube.",
   "starrysky.configuration.meteorShowers": "Pluies d'étoiles filantes",
   "starrysky.configuration.meteorShowers.tooltip": "Environ une nuit sur dix, beaucoup plus d'étoiles filantes. Annoncée au crépuscule.",
   "starrysky.configuration.moonHalo": "Halo de lune",
   "starrysky.configuration.moonHalo.tooltip": "Une lueur douce autour de la lune, plus forte à la pleine lune. La pleine lune pâlit aussi un peu les étoiles et la Voie lactée.",
-
   "starrysky.configuration.hideCloudsAtNight": "Effacer les nuages la nuit",
   "starrysky.configuration.hideCloudsAtNight.tooltip": "Les nuages s'effacent progressivement à la tombée de la nuit et reviennent à l'aube, pour que rien ne cache les étoiles. Ils restent quand il pleut ou qu'il neige.",
-
   "key.categories.starrysky": "Starry Sky",
   "key.starrysky.journal": "Carnet d'observation",
-
   "starrysky.journal.title": "Carnet d'observation",
   "starrysky.journal.counter": "%s / %s observés",
   "starrysky.journal.empty": "Rien d'observé pour l'instant. La nuit, gardez une étoile brillante ou une planète au centre de la longue-vue un court instant pour l'ajouter ici.",
   "starrysky.journal.new_discovery": "Nouvelle découverte",
-
   "starrysky.shower.announce": "Une pluie d'étoiles filantes illumine le ciel cette nuit",
-
   "starrysky.planet.venus": "Vénus",
   "starrysky.planet.mars": "Mars",
   "starrysky.planet.jupiter": "Jupiter",
@@ -70,7 +51,6 @@
   "starrysky.telescope.type_label": "Type",
   "starrysky.telescope.au": "%s UA",
   "starrysky.telescope.type.m": "Supergéante rouge",
-
   "starrysky.telescope.class": "Classe",
   "starrysky.telescope.magnitude": "Magnitude",
   "starrysky.telescope.distance": "Distance",
@@ -83,10 +63,41 @@
   "starrysky.telescope.type.k": "Géante orange",
   "starrysky.telescope.hint.aim": "Visez une étoile brillante",
   "starrysky.telescope.hint.too_bright": "Le ciel est trop clair pour voir les étoiles",
-
   "starrysky.configuration.hideVanillaStars": "Masquer les étoiles de base",
   "starrysky.configuration.hideVanillaStars.tooltip": "Cache les étoiles d'origine de Minecraft là où Starry Sky est actif.",
-
   "starrysky.configuration.dimensions": "Dimensions",
-  "starrysky.configuration.dimensions.tooltip": "Identifiants des dimensions où Starry Sky est actif (ex. minecraft:overworld). Seules les dimensions avec un ciel normal sont concernées : le Nether et l'End restent inchangés."
+  "starrysky.configuration.dimensions.tooltip": "Identifiants des dimensions où Starry Sky est actif (ex. minecraft:overworld). Seules les dimensions avec un ciel normal sont concernées : le Nether et l'End restent inchangés.",
+  "starrysky.configuration.comets": "Comètes",
+  "starrysky.configuration.comets.tooltip": "De temps en temps, une comète reste visible quelques nuits : un noyau brillant, une chevelure verdâtre et deux queues (poussières dorées et ions bleus) qui pointent toujours à l'opposé du soleil. Visez-la à la longue-vue pour l'ajouter au carnet !",
+  "starrysky.configuration.eclipses": "Éclipses de lune",
+  "starrysky.configuration.eclipses.tooltip": "Certaines nuits de pleine lune, la lune s'assombrit puis devient rouge cuivré vers minuit. Le ciel plus noir laisse mieux voir les étoiles.",
+  "starrysky.eclipse.announce": "Une éclipse de lune aura lieu cette nuit, vers minuit",
+  "starrysky.comet.announce": "La comète %s est visible dans le ciel",
+  "starrysky.planet_type.comet": "Comète",
+  "starrysky.journal.tab.stars": "Astres",
+  "starrysky.journal.tab.achievements": "Succès",
+  "starrysky.journal.achievement_counter": "%s / %s succès débloqués",
+  "starrysky.achievement.toast": "Succès d'astronome !",
+  "starrysky.achievement.first_light": "Première lumière",
+  "starrysky.achievement.first_light.desc": "Observer un premier astre à la longue-vue",
+  "starrysky.achievement.amateur": "Astronome amateur",
+  "starrysky.achievement.amateur.desc": "Observer 25 astres",
+  "starrysky.achievement.confirmed": "Astronome confirmé",
+  "starrysky.achievement.confirmed.desc": "Observer 100 astres",
+  "starrysky.achievement.planets": "Tour du système solaire",
+  "starrysky.achievement.planets.desc": "Observer Vénus, Mars, Jupiter et Saturne",
+  "starrysky.achievement.figure": "Relier les points",
+  "starrysky.achievement.figure.desc": "Observer toutes les étoiles d'une constellation",
+  "starrysky.achievement.cartographer": "Cartographe céleste",
+  "starrysky.achievement.cartographer.desc": "Compléter toutes les constellations",
+  "starrysky.achievement.comet": "Chasseur de comètes",
+  "starrysky.achievement.comet.desc": "Observer une comète à la longue-vue",
+  "starrysky.achievement.eclipse": "Lune de sang",
+  "starrysky.achievement.eclipse.desc": "Regarder la lune pendant une éclipse totale",
+  "starrysky.achievement.shower": "Faites un vœu",
+  "starrysky.achievement.shower.desc": "Admirer une pluie d'étoiles filantes",
+  "starrysky.achievement.aurora": "Danse des aurores",
+  "starrysky.achievement.aurora.desc": "Voir des aurores boréales bien visibles",
+  "starrysky.achievement.master": "Maître des étoiles",
+  "starrysky.achievement.master.desc": "Observer tous les astres du ciel"
 }

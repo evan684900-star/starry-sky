@@ -70,7 +70,7 @@ public final class TelescopeTargeting {
      * @param look        direction du regard, dans le repère du monde
      */
     public static void update(Matrix4f skyRotation, Matrix4f starView, Matrix4f projection, Vector3f look,
-                              boolean includePlanets) {
+                              boolean includePlanets, boolean includeComet) {
         // Direction du regard dans le repère du ciel : on applique la rotation inverse (sa transposée).
         float lx = skyRotation.m00() * look.x + skyRotation.m01() * look.y + skyRotation.m02() * look.z;
         float ly = skyRotation.m10() * look.x + skyRotation.m11() * look.y + skyRotation.m12() * look.z;
@@ -80,9 +80,12 @@ public final class TelescopeTargeting {
         float bestScore = -2.0F;
         List<CatalogStar> stars = StarCatalog.stars();
         List<CatalogStar> planets = includePlanets ? fr.evan.starrysky.render.Planets.catalog() : List.of();
-        int total = stars.size() + planets.size();
+        List<CatalogStar> comets = includeComet ? fr.evan.starrysky.render.Comet.catalog() : List.of();
+        int total = stars.size() + planets.size() + comets.size();
         for (int i = 0; i < total; i++) {
-            CatalogStar star = i < stars.size() ? stars.get(i) : planets.get(i - stars.size());
+            CatalogStar star = i < stars.size() ? stars.get(i)
+                    : i < stars.size() + planets.size() ? planets.get(i - stars.size())
+                    : comets.get(i - stars.size() - planets.size());
             boolean current = star == target;
             // dot = cosinus de l'angle entre le regard et l'étoile (1 = pile au centre).
             float dot = star.x() * lx + star.y() * ly + star.z() * lz;
