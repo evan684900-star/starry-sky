@@ -31,6 +31,16 @@ génération d'étoiles, hors du jeu) : ce n'est pas une capture d'écran prise 
 - **Planètes** (optionnelles) : Vénus (près de l'horizon au crépuscule ou à l'aube), Mars, Jupiter et Saturne.
   Brillantes, sans scintillement, elles se déplacent d'une nuit à l'autre.
 - **Pluies d'étoiles filantes** (optionnelles) : environ une nuit sur dix, annoncées au crépuscule.
+- **Comètes** (optionnelles) : environ une fois toutes les 24 nuits, une comète reste visible 5 nuits. Elle a un
+  noyau brillant, une chevelure verdâtre et deux queues qui pointent toujours à l'opposé du soleil : une queue de
+  poussières dorée, large et courbée, et une queue d'ions bleue, fine et droite. Elle grandit, atteint son maximum au
+  milieu de son passage puis s'efface, et dérive un peu d'une nuit à l'autre. Chaque comète a son nom (« C/1 Sélène »)
+  et peut être observée à la longue-vue.
+- **Éclipses de lune** (optionnelles) : une pleine lune sur trois, la lune passe dans l'ombre de la Terre autour de
+  minuit. Elle s'assombrit puis devient rouge cuivré pendant la totalité (« lune de sang »), son halo rougit, et le
+  ciel plus noir fait mieux ressortir les étoiles et la Voie lactée.
+- **Annonces au crépuscule** : une éclipse, une comète ou une pluie d'étoiles filantes est annoncée à la tombée de
+  la nuit.
 - **Lune ronde** : la lune carrée de Minecraft est remplacée par une lune ronde et lisse, avec ses mers, un léger halo
   et ses 8 phases. C'est une texture : elle s'applique même si le mod est désactivé dans la config, et un pack de
   ressources qui modifie la lune passe devant.
@@ -52,7 +62,14 @@ génération d'étoiles, hors du jeu) : ce n'est pas une capture d'écran prise 
 - **Carnet d'observation** (touche **J**, modifiable dans Options → Commandes) : chaque étoile ou planète gardée un
   court instant au centre de la longue-vue y est enregistrée, avec un carillon et un badge « Nouvelle découverte ».
   Un compteur indique la progression (par exemple 23 / 342). Le carnet est sauvegardé sur ton ordinateur, un par
-  monde solo ou par serveur, dans `.minecraft/starrysky/journal/`.
+  monde solo ou par serveur, dans `.minecraft/starrysky/journal/`. Les comètes observées y restent, même quand
+  elles ont quitté le ciel.
+- **Succès d'astronome** (onglet « Succès » du carnet, touche **Tab** pour changer d'onglet) : 11 succès avec une
+  notification dans le style des progrès de Minecraft. Première lumière (1 astre), Astronome amateur (25), Astronome
+  confirmé (100), Tour du système solaire (les 4 planètes), Relier les points (une constellation complète),
+  Cartographe céleste (toutes les constellations), Chasseur de comètes, Lune de sang (regarder la lune pendant une
+  éclipse totale), Faites un vœu (une pluie d'étoiles filantes), Danse des aurores et Maître des étoiles (tous les
+  astres). Ils sont enregistrés avec le carnet, un par monde.
 - Les étoiles de base de Minecraft sont masquées là où le mod est actif (optionnel).
 - Actif uniquement dans l'**Overworld** par défaut : le Nether et l'End restent inchangés.
 
@@ -89,6 +106,8 @@ Ils sont aussi enregistrés dans `config/starrysky-client.toml`.
 | `planets` | booléen | `true` | — | Vénus, Mars, Jupiter et Saturne. |
 | `meteorShowers` | booléen | `true` | — | Pluie d'étoiles filantes environ une nuit sur dix. |
 | `moonHalo` | booléen | `true` | — | Halo autour de la lune. |
+| `comets` | booléen | `true` | — | Comète visible quelques nuits, de temps en temps. |
+| `eclipses` | booléen | `true` | — | Éclipses de lune (une pleine lune sur trois). |
 | `hideCloudsAtNight` | booléen | `true` | — | Nuages effacés progressivement la nuit (sauf pluie). |
 | `telescope` | booléen | `true` | — | Infos des étoiles en visant avec la longue-vue. |
 | `hideVanillaStars` | booléen | `true` | — | Cache les étoiles de base de Minecraft. |
@@ -106,8 +125,9 @@ Le mod est conçu pour ne pas faire ralentir le jeu, y compris sur une carte gra
   les modifier ne reconstruit rien.
 - **Aucune texture, aucun calcul de bruit par pixel.** Les nuages de la Voie lactée sont calculés une fois sur le
   processeur et enregistrés dans la couleur des sommets d'un maillage.
-- **4 appels de dessin au maximum** par image (lueur, aurores, étoiles, étoiles filantes), et aucun objet créé pendant le
-  rendu (pas de travail supplémentaire pour le ramasse-miettes de Java).
+- **Peu d'appels de dessin** par image (lueur, halo, aurores, étoiles, planètes, étoiles filantes, plus deux les nuits
+  de comète), et aucun objet créé pendant le rendu (pas de travail supplémentaire pour le ramasse-miettes de Java).
+  Le maillage de la comète (quelques centaines de sommets) n'est reconstruit qu'une fois par minute de jeu.
 - **Rien n'est dessiné** le jour, sous la pluie battante, ni pour les étoiles situées sous l'horizon.
 
 Ordres de grandeur mesurés dans le banc d'essai des shaders (navigateur, 1920×1080, carte intégrée Intel UHD) —
@@ -165,6 +185,10 @@ src/main/java/fr/evan/starrysky/
 ├── render/Constellations.java     Vraies constellations (étoiles et traits)
 ├── render/Planets.java            Planètes
 ├── render/MoonHalo.java           Halo de lune
+├── render/Comet.java              Comètes (noyau, chevelure, queues de poussières et d'ions)
+├── render/LunarEclipse.java       Éclipses de lune (dates et teinte de la lune)
+├── telescope/Achievement.java     Succès du carnet (objectifs et progression)
+├── telescope/AchievementToast.java  Notification de succès
 ├── telescope/ObservationJournal.java  Carnet d'observation (sauvegarde locale)
 ├── telescope/JournalScreen.java   Écran du carnet
 ├── mixin/OptionsMixin.java        Nuages masqués en pleine nuit
@@ -192,7 +216,9 @@ traduite via `fml.menu.mods.info.description.starrysky`.
 ## Note technique : les mixins
 
 `OptionsMixin` masque les nuages en pleine nuit, `LevelRendererMixin` (et `SodiumCloudRendererMixin` avec Sodium)
-gère leur fondu. Tous sont facultatifs : s'ils ne peuvent pas s'appliquer, le jeu ne plante pas.
+gère leur fondu. En 1.21.1, l'opacité des nuages est écrite dans leur maillage : le fondu multiplie donc l'alpha de la
+couleur du shader juste avant que le maillage soit dessiné. `LevelRendererMixin` teinte aussi la lune pendant les
+éclipses, juste avant qu'elle soit dessinée. Tous sont facultatifs : s'ils ne peuvent pas s'appliquer, le jeu ne plante pas.
 
 `LevelRendererMixin` sert aussi à **masquer les étoiles de base**. Elles sont dessinées au milieu de
 `LevelRenderer#renderSky` depuis un tampon privé, et NeoForge n'a pas d'événement pour les désactiver.

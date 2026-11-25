@@ -32,7 +32,7 @@ public final class AchievementToast implements Toast {
         graphics.blitSprite(ICON, 8, 8, 16, 16);
         graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        graphics.drawString(font, Component.translatable("starrysky.achievement.toast"), 30, 7, 0xFFE8C77A, false);
+        graphics.drawString(font, font.substrByWidth(Component.translatable("starrysky.achievement.toast"), width() - 34).getString(), 30, 7, 0xFFE8C77A, false);
         graphics.drawString(font, font.substrByWidth(achievement.title(), width() - 36).getString(), 30, 18, 0xFFFFFFFF, false);
 
         return timeSinceLastVisible >= DISPLAY_MILLIS * toasts.getNotificationDisplayTimeMultiplier()

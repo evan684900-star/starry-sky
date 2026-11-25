@@ -77,7 +77,7 @@
   "starrysky.journal.tab.stars": "Sky objects",
   "starrysky.journal.tab.achievements": "Achievements",
   "starrysky.journal.achievement_counter": "%s / %s achievements unlocked",
-  "starrysky.achievement.toast": "Astronomer achievement!",
+  "starrysky.achievement.toast": "Achievement unlocked!",
   "starrysky.achievement.first_light": "First Light",
   "starrysky.achievement.first_light.desc": "Observe your first sky object with a spyglass",
   "starrysky.achievement.amateur": "Amateur Astronomer",

@@ -24,12 +24,14 @@ public enum Achievement {
     ECLIPSE("eclipse", 0xFF7A5C, 1, Kind.EVENT),
     SHOWER("shower", 0xBFE3FF, 1, Kind.EVENT),
     AURORA("aurora", 0x7DFFB8, 1, Kind.EVENT),
-    MASTER("master", 0xE8C77A, -1, Kind.COUNT);
+    MASTER("master", 0xE8C77A, -1, Kind.ALL);
 
     /** Comment se mesure la progression. */
     private enum Kind {
-        /** Nombre d'astres observés (étoiles et planètes). */
+        /** Nombre d'astres observés (étoiles, planètes et comètes). */
         COUNT,
+        /** Tous les astres du ciel (étoiles et planètes ; les comètes, de passage, n'en font pas partie). */
+        ALL,
         /** Nombre de planètes observées. */
         PLANETS,
         /** Nombre de constellations dont toutes les étoiles ont été observées. */
@@ -84,6 +86,9 @@ public enum Achievement {
     public int progress() {
         return switch (kind) {
             case COUNT -> ObservationJournal.countDiscovered(Planets.catalog())
+                    + ObservationJournal.countDiscovered(StarCatalog.stars())
+                    + ObservationJournal.discoveredComets().size();
+            case ALL -> ObservationJournal.countDiscovered(Planets.catalog())
                     + ObservationJournal.countDiscovered(StarCatalog.stars());
             case PLANETS -> ObservationJournal.countDiscovered(Planets.catalog());
             case FIGURES -> completedFigures();

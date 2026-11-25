@@ -32,7 +32,7 @@ public final class Comet {
     /** ...pendant VISIBLE_NIGHTS nuits. */
     public static final int VISIBLE_NIGHTS = 5;
     /** Intensité maximale de la lueur (queues et chevelure). */
-    public static final float GLOW_PEAK = 0.55F;
+    public static final float GLOW_PEAK = 1.0F;
 
     /** Noms imaginaires des comètes (le numéro d'apparition les rend uniques : « C/7 Lumen »). */
     private static final String[] NAMES = {
@@ -140,7 +140,7 @@ public final class Comet {
         float bz = px * ty - py * tx;
         float bend = (h & 0x10000) != 0 ? 1.0F : -1.0F;
 
-        float length = (float) Math.toRadians(10.0 + 14.0 * envelope + 6.0 * unit(h >>> 16));
+        float length = (float) Math.toRadians(16.0 + 20.0 * envelope + 8.0 * unit(h >>> 16));
         buildGlow(px, py, pz, tx, ty, tz, bx * bend, by * bend, bz * bend, length);
         buildNucleus(px, py, pz);
         catalog = List.of(entry(cycle, px, py, pz, envelope));
@@ -173,9 +173,9 @@ public final class Comet {
         try (ByteBufferBuilder bytes = new ByteBufferBuilder(quads * 4 * format.getVertexSize())) {
             BufferBuilder builder = new BufferBuilder(bytes, VertexFormat.Mode.QUADS, format);
             // Queue de poussières : large, courbée, dorée.
-            tail(builder, px, py, pz, tx, ty, tz, bx, by, bz, length, 0.55F, 0.35F, 255, 236, 200, 0.85F);
+            tail(builder, px, py, pz, tx, ty, tz, bx, by, bz, length, 0.45F, 0.16F, 255, 236, 200, 1.0F);
             // Queue d'ions : fine, droite, bleue, un peu plus longue.
-            tail(builder, px, py, pz, tx, ty, tz, bx, by, bz, length * 1.25F, 0.0F, 0.09F, 130, 185, 255, 0.7F);
+            tail(builder, px, py, pz, tx, ty, tz, bx, by, bz, length * 1.25F, 0.0F, 0.045F, 130, 185, 255, 0.8F);
             coma(builder, px, py, pz, tx, ty, tz, bx, by, bz);
             if (glowBuffer == null) {
                 glowBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
@@ -230,7 +230,7 @@ public final class Comet {
 
         // Lumière : plus forte près de la tête, nulle au bout et sur les bords (profil doux).
         double edge = 1.0 - across * across;
-        double light = strength * edge * edge * Math.pow(1.0 - f, 1.6) * (0.35 + 0.65 * Math.exp(-f * 3.0));
+        double light = strength * edge * edge * Math.pow(1.0 - f, 1.1) * (0.55 + 0.45 * Math.exp(-f * 4.0));
         int alpha = (int) Math.round(Math.min(1.0, light) * 255.0);
         builder.addVertex((float) (x / l * StarField.RADIUS), (float) (y / l * StarField.RADIUS), (float) (z / l * StarField.RADIUS))
                 .setColor(r, g, b, alpha);

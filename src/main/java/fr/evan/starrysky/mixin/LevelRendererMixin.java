@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -42,17 +41,31 @@ public abstract class LevelRendererMixin {
     }
 
     /**
-     * Fondu des nuages à la tombée de la nuit : les nuages du jeu de base sont dessinés avec une opacité de 0,8,
-     * fixée par {@code RenderSystem.setShaderColor(r, g, b, 0.8)} ; on la multiplie par le facteur de fondu.
-     * Seules les valeurs inférieures à 1 sont touchées, pour ne pas modifier la remise à zéro (1, 1, 1, 1) qui suit.
+     * Fondu des nuages à la tombée de la nuit. En 1.21.1, l'opacité des nuages (0,8) est écrite dans leur maillage :
+     * on multiplie donc l'alpha de la couleur du shader juste avant chaque dessin du maillage, puis on le remet à 1.
      */
-    @ModifyArg(
+    @Inject(
             method = "renderClouds",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"),
-            index = 3,
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V"),
             require = 0)
-    private float starrysky$fadeClouds(float alpha) {
-        return alpha < 0.999F ? alpha * SkyRenderHandler.cloudFactor() : alpha;
+    private void starrysky$fadeClouds(CallbackInfo ci) {
+        float factor = SkyRenderHandler.cloudFactor();
+        if (factor < 0.999F) {
+            float[] c = RenderSystem.getShaderColor();
+            RenderSystem.setShaderColor(c[0], c[1], c[2], c[3] * factor);
+        }
+    }
+
+    @Inject(
+            method = "renderClouds",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V",
+                    shift = At.Shift.AFTER),
+            require = 0)
+    private void starrysky$restoreCloudColor(CallbackInfo ci) {
+        if (SkyRenderHandler.cloudFactor() < 0.999F) {
+            float[] c = RenderSystem.getShaderColor();
+            RenderSystem.setShaderColor(c[0], c[1], c[2], 1.0F);
+        }
     }
 
     /**
